@@ -1,3 +1,13 @@
-import { JsonWebTokenError } from "jsonwebtoken";
-import User from "../models/userModel";
-import ErrorHandler from "../utils/ErrorHandler";
+const JsonWebTokenError = require("jsonwebtoken");
+const User = require("../models/userModel");
+
+exports.fakeAuth = async (req, res, next) => {
+  // req.user = await User.findOne({ phoneNumber: "1212121212" });
+  req.user = await User.findOne({ phoneNumber: "1111111111" });
+  console.log(req.user);
+  next();
+};
+
+// fakeAuth();
+
+// module.exports = fakeAuth;
