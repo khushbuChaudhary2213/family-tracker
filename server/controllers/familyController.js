@@ -87,3 +87,56 @@ exports.joinFamily = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getFamilyInfo = async (req, res, next) => {
+  try {
+    const { familyName } = req.body;
+    const family = await Family.findOne({ familyName })
+      .populate("admin", "_id phoneNumber")
+      .populate("members.user", "_id phoneNumber");
+
+    if (!family) return next(new ErrorHandler(404, "Family not found!"));
+
+    res.status(200).json({
+      success: true,
+      message: "Family fetched successfully",
+      data: {
+        family,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.removeMember = async (req, res, next) => {
+  try {
+    const { familyId, memberId } = req.body;
+
+    // Find Family
+    const family = await Family.findById(familyId);
+    if (!family) return next(new ErrorHandler(404, "Family not found!"));
+
+    // Find Member
+    const isMember = family.members.some(
+      (member) => member.user.toString() === memberId,
+    );
+    if (!isMember) return next(new ErrorHandler(404, "Member not found!"));
+
+    // Preventing removing admin
+    if (family.admin.toString() === memberId)
+      return next(new ErrorHandler(400, "Admin cannot be removed!"));
+
+    // Removing Member
+    family.members = family.members.filter(
+      (member) => member.user.toString() !== memberId,
+    );
+    await family.save();
+
+    res
+      .status(200)
+      .json({ success: true, message: "Member removed successfully" });
+  } catch (err) {
+    next(err);
+  }
+};

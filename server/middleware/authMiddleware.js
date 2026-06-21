@@ -3,7 +3,8 @@ const User = require("../models/userModel");
 
 exports.fakeAuth = async (req, res, next) => {
   // req.user = await User.findOne({ phoneNumber: "1212121212" });
-  req.user = await User.findOne({ phoneNumber: "1111111111" });
+  req.user = await User.findOne({ phoneNumber: "9454371062" });
+  // req.user = await User.findOne({ phoneNumber: "1111111111" });
   console.log(req.user);
   next();
 };

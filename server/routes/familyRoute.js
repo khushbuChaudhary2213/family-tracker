@@ -15,4 +15,8 @@ router.post(
   familyController.joinFamily,
 );
 
+router
+  .post("/", familyController.getFamilyInfo)
+  .delete("/removeMember", familyController.removeMember);
+
 module.exports = router;
