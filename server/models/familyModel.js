@@ -12,11 +12,12 @@ const familySchema = new mongoose.Schema(
       unique: true,
     },
 
-    admin: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+    // Changed feature from single to multi-admin
+    // admin: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "User",
+    //   required: true,
+    // },
 
     members: [
       {
