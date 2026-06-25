@@ -5,6 +5,7 @@ const inviteCodeGen = require("../utils/inviteCodeGen");
 const {
   removeMemberFromFamily,
   removeLocationPermission,
+  roleMembers,
 } = require("../utils/familyServices");
 const { preventLastAdminLeaving } = require("../middleware/familyMiddleware");
 
@@ -100,22 +101,35 @@ exports.joinFamily = async (req, res, next) => {
 
 exports.getFamilyInfo = async (req, res, next) => {
   try {
-    const { familyName } = req.body;
-    const family = await Family.findOne({ familyName }).populate(
-      "members.user",
-      "_id phoneNumber",
-    );
+    const user = req.user;
+
+    const family = await Family.findOne({
+      "members.user": user._id,
+    }).populate("members.user", "phoneNumber");
 
     if (!family) return next(new ErrorHandler(404, "Family not found!"));
 
-    const admins = family.members.filter((m) => m.role === "admin");
+    const formattedMembers = family.members
+      .filter((m) => m.user) // Safety check in case a user was deleted from the DB
+      .map((m) => ({
+        _id: m.user._id,
+        phoneNumber: m.user.phoneNumber,
+      }));
+
+    const admins = roleMembers(family, "admin");
+    const formattedAdmins = admins.map((admin) => ({
+      _id: admin.user._id.toString(),
+      phoneNumber: admin.user.phoneNumber,
+    }));
 
     res.status(200).json({
       success: true,
       message: "Family fetched successfully",
       data: {
-        family,
-        admins,
+        familyName: family.familyName,
+        inviteCode: family.inviteCode,
+        admins: formattedAdmins,
+        members: formattedMembers,
       },
     });
   } catch (err) {

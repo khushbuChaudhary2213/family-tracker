@@ -11,3 +11,7 @@ exports.removeLocationPermission = (family, memberId) => {
     );
   });
 };
+
+exports.roleMembers = (family, role) => {
+  return family.members.filter((m) => m.role === role);
+};

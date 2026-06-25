@@ -10,5 +10,4 @@ exports.fakeAuth = async (req, res, next) => {
 };
 
 // fakeAuth();
-
 // module.exports = fakeAuth;

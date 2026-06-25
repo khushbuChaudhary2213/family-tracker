@@ -31,11 +31,18 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    currentLocation: {
+      type: { type: String, default: "Point" },
+      coordinates: { type: [Number], default: [0, 0] },
+    },
+    locationUpdatedAt: { type: Date },
   },
   {
     timestamps: true,
   },
 );
+
+userSchema.index({ currentLocation: "2dsphere" });
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

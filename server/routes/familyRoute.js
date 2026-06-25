@@ -16,7 +16,7 @@ router.post(
   familyController.joinFamily,
 );
 
-router.post("/", familyController.getFamilyInfo);
+router.get("/", authMiddleware.fakeAuth, familyController.getFamilyInfo);
 
 router.post(
   "/removeMember",
