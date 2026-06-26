@@ -19,23 +19,32 @@ router.post(
 router.get("/", authMiddleware.fakeAuth, familyController.getFamilyInfo);
 
 router.post(
-  "/removeMember",
+  "/:familyId/removeMember",
   authMiddleware.fakeAuth,
   familyMiddleware.loadFamily,
-  familyMiddleware.isFamilyMember,
-  familyMiddleware.isFamilyAdmin,
+  familyMiddleware.isFamilyMember, // checks if target id is in the family or not
+  familyMiddleware.isFamilyAdmin, // check if requester is admin or not
   familyMiddleware.preventLastAdminLeaving,
   familyController.removeMember,
 );
 
 router.post(
-  "/leaveFamily",
+  "/:familyId/leaveFamily",
   authMiddleware.fakeAuth,
   familyMiddleware.loadFamily,
-  familyMiddleware.isSelfAction,
-  familyMiddleware.isFamilyMember,
+  familyMiddleware.isSelfAction, // checks if the memberId is of self or not
+  familyMiddleware.isFamilyMember, // Checks if Target id is in the family or not
   familyMiddleware.preventLastAdminLeaving,
   familyController.leaveFamily,
+);
+
+router.patch(
+  "/:familyId/permissions",
+  authMiddleware.fakeAuth,
+  familyMiddleware.loadFamily, // Fetches the family
+  familyMiddleware.isFamilyAdmin, // Checks the requester (are u an admin ?)
+  familyMiddleware.isFamilyMember, // Checks the TARGET (Is the person u are changing is actually in the family?)
+  familyController.updateMemberPermissions,
 );
 
 module.exports = router;

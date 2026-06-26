@@ -11,4 +11,10 @@ router.post(
   locationController.updateLocation,
 );
 
+router.get(
+  "/getFamilyLocations",
+  authMiddleware.fakeAuth,
+  locationController.getFamilyLocations,
+);
+
 module.exports = router;

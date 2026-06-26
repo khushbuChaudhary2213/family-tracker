@@ -233,3 +233,28 @@ exports.leaveFamily = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.updateMemberPermissions = async (req, res, next) => {
+  try {
+    const { targetMemberId, newAllowedIds } = req.body;
+
+    const family = req.family;
+    const targetMember = await family.members.find(
+      (m) => m.user._id.toString() === targetMemberId,
+    );
+
+    targetMember.canViewLocationsOf = newAllowedIds;
+
+    await family.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Member Permission Updated Successfulyy!",
+      data: {
+        family,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};

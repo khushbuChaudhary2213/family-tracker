@@ -3,7 +3,7 @@ const ErrorHandler = require("../utils/ErrorHandler");
 
 exports.loadFamily = async (req, res, next) => {
   try {
-    const { familyId } = req.body;
+    const { familyId } = req.params;
 
     const family = await Family.findById(familyId).populate(
       "members.user",
@@ -24,7 +24,7 @@ exports.loadFamily = async (req, res, next) => {
 };
 
 exports.isFamilyMember = (req, res, next) => {
-  const { memberId } = req.body;
+  const memberId = req.body.memberId || req.body.targetMemberId;
 
   const isMember = req.family.members.some(
     (member) => member.user._id.toString() === memberId,
