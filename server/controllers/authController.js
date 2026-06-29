@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel.js");
 const ErrorHandler = require("../utils/ErrorHandler.js");
+const signToken = require("../utils/signToken.js");
 
 exports.register = async (req, res, next) => {
   try {
@@ -12,6 +13,7 @@ exports.register = async (req, res, next) => {
       );
 
     const existingUser = await User.findOne({ phoneNumber });
+    console.log(existingUser);
 
     if (existingUser) {
       return next(new ErrorHandler(400, "User already exists!"));
@@ -22,9 +24,16 @@ exports.register = async (req, res, next) => {
       password,
       confirmPassword,
     });
+
+    const token = signToken(newUser._id);
+
+    newUser.password = undefined;
+
     res.status(201).json({
       success: true,
       message: "User registered successfully",
+      token,
+      data: { user: newUser },
     });
   } catch (err) {
     next(err);
@@ -41,15 +50,20 @@ exports.login = async (req, res, next) => {
     }
 
     // Compare passwords
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.correctPassword(password, user.password);
 
     if (!isMatch) {
-      return next(new ErrorHandler(401, "Invalid Credentials!"));
+      return next(new ErrorHandler(401, "Incorrect phone number or password!"));
     }
+
+    const token = signToken(user._id);
+
+    user.password = undefined;
 
     res.status(200).json({
       success: true,
       message: "User Login Successfully!",
+      token,
       data: {
         user,
       },

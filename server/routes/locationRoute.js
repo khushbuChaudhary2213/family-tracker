@@ -4,17 +4,10 @@ const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Guarding the route with your fakeAuth middleware
-router.post(
-  "/update",
-  authMiddleware.fakeAuth,
-  locationController.updateLocation,
-);
+router.use(authMiddleware.protect);
 
-router.get(
-  "/getFamilyLocations",
-  authMiddleware.fakeAuth,
-  locationController.getFamilyLocations,
-);
+router.post("/update", locationController.updateLocation);
+
+router.get("/getFamilyLocations", locationController.getFamilyLocations);
 
 module.exports = router;

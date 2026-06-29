@@ -5,22 +5,15 @@ const familyMiddleware = require("../middleware/familyMiddleware");
 
 const router = express.Router();
 
-router.post(
-  "/createFamily",
-  authMiddleware.fakeAuth,
-  familyController.createFamily,
-);
-router.post(
-  "/joinFamily",
-  authMiddleware.fakeAuth,
-  familyController.joinFamily,
-);
+router.use(authMiddleware.protect);
 
-router.get("/", authMiddleware.fakeAuth, familyController.getFamilyInfo);
+router.post("/createFamily", familyController.createFamily);
+router.post("/joinFamily", familyController.joinFamily);
+
+router.get("/me", familyController.getFamilyInfo);
 
 router.post(
   "/:familyId/removeMember",
-  authMiddleware.fakeAuth,
   familyMiddleware.loadFamily,
   familyMiddleware.isFamilyMember, // checks if target id is in the family or not
   familyMiddleware.isFamilyAdmin, // check if requester is admin or not
@@ -30,7 +23,6 @@ router.post(
 
 router.post(
   "/:familyId/leaveFamily",
-  authMiddleware.fakeAuth,
   familyMiddleware.loadFamily,
   familyMiddleware.isSelfAction, // checks if the memberId is of self or not
   familyMiddleware.isFamilyMember, // Checks if Target id is in the family or not
@@ -40,7 +32,6 @@ router.post(
 
 router.patch(
   "/:familyId/permissions",
-  authMiddleware.fakeAuth,
   familyMiddleware.loadFamily, // Fetches the family
   familyMiddleware.isFamilyAdmin, // Checks the requester (are u an admin ?)
   familyMiddleware.isFamilyMember, // Checks the TARGET (Is the person u are changing is actually in the family?)
