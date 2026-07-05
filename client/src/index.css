@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme {
+  /* 👇 Custom theme color declarations for Sentry Theme */
+  --color-background: #131313;
+  --color-surface: #131313;
+  --color-surface-container: #201f1f;
+  --color-surface-container-lowest: #0e0e0e;
+  --color-primary: #b0c6ff;
+  --color-secondary: #4edea3;
+  --color-tertiary: #ffb95f;
+  --color-error: #ffb4ab;
+  --color-on-surface: #e5e2e1;
+  --color-on-surface-variant: #c2c6d7;
+}
+
+/* 👇 Core font and layout styles */
+body {
+  font-family: "Geist", sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+}
+
+.glass-panel {
+  backdrop-filter: blur(20px);
+  background-color: rgba(30, 30, 30, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.status-glow-safe {
+  box-shadow: 0 0 8px rgba(78, 222, 163, 0.4);
+}
+
+.map-pulse {
+  position: relative;
+}
+.map-pulse::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(176, 198, 255, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
