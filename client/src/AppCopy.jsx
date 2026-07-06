@@ -5,8 +5,8 @@ export default function App() {
   // const [currentView, setCurrentView] = useState("dashboard");
 
   return (
-    <div className="w-screen h-screen bg-background text-on-surface antialiased overflow-hidden flex flex-col">
-      <Auth />
-    </div>
+    // <div className="w-screen h-screen bg-background text-on-surface antialiased overflow-hidden flex flex-col">
+    <Auth />
+    // {/* </div> */}
   );
 }

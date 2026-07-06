@@ -1,98 +1,131 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showMobileForm, setShowMobileForm] = useState(false);
+
+  // State for controlled inputs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // 💡 New State
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isSignUp) {
-      // Client-side validation check for password mismatch
-      if (password !== confirmPassword) {
-        alert("Passwords do not match!");
-        return;
-      }
-      console.log("Registering:", { email, password, agreeToTerms });
-      // TODO: Call your registration backend API route here
+      console.log("Registering account:", {
+        email,
+        password,
+      });
     } else {
       console.log("Logging in:", { email, password });
-      // TODO: Call your login backend API route here
     }
   };
 
   return (
-    <main className="relative h-screen w-screen max-h-screen grid grid-cols-1 lg:grid-cols-12 bg-background text-on-surface antialiased overflow-hidden">
+    <main className="relative min-h-screen w-screen grid grid-cols-1 lg:grid-cols-12 bg-[#131313] text-[#e5e2e1] antialiased overflow-y-auto lg:overflow-hidden select-none [font-family:'Geist',sans-serif]">
       {/* Atmospheric Background Element */}
-      <div className="absolute inset-0 z-0 opacity-25 pointer-events-none">
+      <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
         <div
           className="w-full h-full bg-cover bg-center"
           style={{
-            backgroundImage:
-              "url('https://lh3.googleusercontent.com/aida-public/AB6AXuC8Vu1ivi8o5m86R4vA9xg8JWVB187A35RRmQHp_km55Mymvxd205AtN53tj_rKruBC7fP06tovIoTe_f3HkfgfUMZ2-LglHinHVNGfSWamr4v5OiCwliGe_VYv_pHCDuckRw06SfhY2jEToS_JsFB0C24ULYdJPt9RUegiHtN2WgRiWVs1PNcAvLH6HVmbJfNxZ1maz0Fr61W3_3fNp4oMugnoBJkQk-cPQKhHdiCNYkR-pRluN2Q7F917rmA5aadq8F9gTgYOxjsm')",
+            backgroundImage: "url('/img/kobu-agency-o8ZesB0MLFo-unsplash.jpg')",
           }}
         ></div>
       </div>
 
-      {/* ================= LEFT SIDE: BRANDING & DETAILS ================= */}
-      <div className="z-10 lg:col-span-5 flex flex-col justify-between p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-white/5 bg-surface-container-lowest/40 backdrop-blur-md">
-        {/* Top Minimal Branding */}
+      {/* ================= LEFT SIDE: BRANDING, LAYOUT PARAGRAPH & MOBILE TRIGGER ================= */}
+      <div
+        className={`z-10 lg:col-span-5 flex flex-col justify-between p-6 md:p-12 border-b lg:border-b-0 lg:border-r border-white/5 bg-[#0e0e0e]/40 backdrop-blur-md gap-8 lg:gap-0 ${
+          showMobileForm ? "hidden lg:flex" : "flex"
+        }`}
+      >
+        {/* Top Branding Header */}
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-2xl">
+          <span className="material-symbols-outlined text-[#b0c6ff] text-2xl">
             shield
           </span>
-          <span className="text-sm font-bold tracking-widest text-outline">
+          <span className="text-[12px] font-semibold tracking-[0.08em] text-[#8c90a0] uppercase">
             SECURE NETWORK
           </span>
         </div>
 
-        {/* Centerpiece Project Info */}
-        <div className="my-auto space-y-4 max-w-md">
-          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(176,198,255,0.15)] border border-primary/20">
-            <span className="material-symbols-outlined text-primary text-[40px]">
+        {/* Center Descriptive Paragraph Block */}
+        <div className="lg:my-auto space-y-6 max-w-md">
+          <div className="w-16 h-16 bg-[#b0c6ff] rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(176,198,255,0.3)]">
+            <span className="material-symbols-outlined text-[#002d6e] text-[40px]">
               shield_person
             </span>
           </div>
-          <h1 className="text-5xl font-extrabold tracking-tighter text-primary lg:text-6xl">
+
+          <h1 className="text-[48px] font-bold tracking-tighter text-[#b0c6ff] leading-[1.1]">
             SENTRY
           </h1>
-          <p className="text-lg text-on-surface font-medium leading-relaxed">
-            Premium Family Protection & Real-time Security.
-          </p>
-          <p className="text-sm text-on-surface-variant leading-relaxed">
-            Keep your inner circle connected and secure. Monitor real-time
-            locations by default as an administrator, issue crypto-secured
-            invite tokens, and manage role-based permissions seamlessly.
-          </p>
+
+          {/* Flex Container Layout: Paragraph Description + Dynamic Continue Button on the Right Edge */}
+          <div className="flex flex-row items-center justify-between gap-4 lg:block lg:space-y-4">
+            <div className="flex flex-col flex-1">
+              <span className="text-[14px] font-medium text-[#c2c6d7] leading-[1.5]">
+                Premium Family Protection & Real-time Security
+              </span>
+              <p className="text-[14px] text-[#8c90a0] leading-[1.5] mt-2 hidden sm:block">
+                Keep your inner circle connected and secure. Monitor real-time
+                endpoints, issue crypto-secured invites, and manage access
+                privileges under strict 256-bit AES protection matrices.
+              </p>
+            </div>
+
+            {/* Mobile Navigation Trigger Button (Visible only below 1024px screen dimensions) */}
+            <button
+              type="button"
+              onClick={() => setShowMobileForm(true)}
+              className="lg:hidden shrink-0 flex items-center justify-center gap-2 px-4 py-3 bg-[#b0c6ff] text-[#002d6e] rounded-xl font-bold text-xs tracking-wider shadow-lg shadow-[#b0c6ff]/20 hover:scale-[1.02] active:scale-95 transition-all duration-200"
+            >
+              CONTINUE
+              <span className="material-symbols-outlined text-sm font-bold">
+                arrow_forward
+              </span>
+            </button>
+          </div>
         </div>
 
-        {/* Encryption Status Footer */}
-        <div className="flex items-center gap-2 text-xs text-outline">
-          <span className="w-2 h-2 rounded-full bg-secondary animate-pulse shadow-[0_0_8px_#4edea3]"></span>
-          <span>
-            Protocol Status:{" "}
-            <span className="text-secondary font-bold">256-bit AES Active</span>
-          </span>
+        {/* Info Area Footer Status */}
+        <div className="flex items-center gap-2 text-[12px] text-[#8c90a0]">
+          <span className="w-2 h-2 rounded-full bg-[#4edea3] shadow-[0_0_8px_rgba(78,222,163,0.6)]"></span>
+          <span>SYSTEM ONLINE</span>
         </div>
       </div>
 
-      {/* ================= RIGHT SIDE: AUTHENTICATION FORM ================= */}
-      <div className="z-10 lg:col-span-7 flex items-center justify-center p-6 lg:p-12 overflow-y-auto custom-scrollbar h-full">
-        <div className="w-full max-w-[420px] my-auto">
-          {/* Main Glass Panel Card */}
-          <div className="glass-panel rounded-xl p-6 border border-white/10 shadow-2xl bg-surface-container/60 backdrop-blur-xl">
-            {/* Tab Toggles */}
-            <div className="flex bg-surface-container-lowest rounded-lg p-1 mb-5">
+      {/* ================= RIGHT SIDE: AUTHENTICATION INTERACTIVE FORM ================= */}
+      <div
+        className={`z-10 lg:col-span-7 items-center justify-center p-6 md:p-12 lg:overflow-y-auto lg:h-full ${
+          showMobileForm ? "flex" : "hidden lg:flex"
+        }`}
+      >
+        <div className="w-full max-w-[440px] lg:my-auto auth-card perspective-1000">
+          {/* Mobile Back/Return Navigation Anchor Link */}
+          <button
+            type="button"
+            onClick={() => setShowMobileForm(false)}
+            className="lg:hidden flex items-center gap-1.5 text-xs font-semibold text-[#8c90a0] hover:text-[#e5e2e1] mb-5 transition-colors"
+          >
+            <span className="material-symbols-outlined text-base">
+              arrow_back
+            </span>
+            Back to Overview
+          </button>
+
+          {/* Master Glass Panel Card Container */}
+          <div className="backdrop-blur-[20px] bg-[#1e1e1e]/70 border border-white/10 rounded-xl p-6 md:p-8 shadow-2xl">
+            {/* Tab Navigation Switches */}
+            <div className="flex bg-[#0e0e0e] rounded-lg p-1 mb-6">
               <button
                 type="button"
                 onClick={() => setIsSignUp(false)}
-                className={`flex-1 py-2 text-xs font-semibold tracking-wider rounded-md transition-all duration-300 ${
+                className={`flex-1 py-2 text-[12px] font-semibold tracking-wider rounded-md transition-all duration-300 ${
                   !isSignUp
-                    ? "bg-secondary-container text-on-secondary-container shadow"
-                    : "text-on-surface-variant hover:text-on-surface"
+                    ? "bg-[#00a572] text-[#00311f] shadow"
+                    : "text-[#c2c6d7] hover:text-[#e5e2e1]"
                 }`}
               >
                 LOGIN
@@ -100,55 +133,56 @@ export default function Auth() {
               <button
                 type="button"
                 onClick={() => setIsSignUp(true)}
-                className={`flex-1 py-2 text-xs font-semibold tracking-wider rounded-md transition-all duration-300 ${
+                className={`flex-1 py-2 text-[12px] font-semibold tracking-wider rounded-md transition-all duration-300 ${
                   isSignUp
-                    ? "bg-secondary-container text-on-secondary-container shadow"
-                    : "text-on-surface-variant hover:text-on-surface"
+                    ? "bg-[#00a572] text-[#00311f] shadow"
+                    : "text-[#c2c6d7] hover:text-[#e5e2e1]"
                 }`}
               >
                 SIGN UP
               </button>
             </div>
 
-            {/* Core Access Forms */}
+            {/* Authentication Action Forms Workspace */}
             <form className="space-y-4" onSubmit={handleSubmit}>
-              {/* Social Oauth Providers */}
+              {/* Federated Social Identity Access Buttons */}
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 bg-surface-container-high py-2 rounded-lg hover:bg-surface-bright transition-colors border border-white/5 text-xs font-medium"
+                  className="flex items-center justify-center gap-2 bg-[#2a2a2a] py-2.5 rounded-lg hover:bg-[#393939] transition-colors border border-white/5 text-xs font-medium"
                 >
-                  <span className="material-symbols-outlined text-sm">
+                  <span className="material-symbols-outlined text-base">
                     google
                   </span>
                   Google
                 </button>
                 <button
                   type="button"
-                  className="flex items-center justify-center gap-2 bg-surface-container-high py-2 rounded-lg hover:bg-surface-bright transition-colors border border-white/5 text-xs font-medium"
+                  className="flex items-center justify-center gap-2 bg-[#2a2a2a] py-2.5 rounded-lg hover:bg-[#393939] transition-colors border border-white/5 text-xs font-medium"
                 >
-                  <span className="material-symbols-outlined text-sm">
+                  <span className="material-symbols-outlined text-base">
                     apps
                   </span>
                   Apple
                 </button>
               </div>
 
-              <div className="relative flex items-center py-1">
+              {/* Styled Divider Segment */}
+              <div className="relative flex items-center py-2">
                 <div className="flex-grow border-t border-white/10"></div>
-                <span className="flex-shrink mx-3 text-[9px] font-bold tracking-widest text-outline">
+                <span className="flex-shrink mx-4 text-[10px] font-semibold tracking-widest text-[#8c90a0]">
                   OR EMAIL
                 </span>
                 <div className="flex-grow border-t border-white/10"></div>
               </div>
 
-              {/* Email Field */}
+              {/* Email Address Parameter Layout */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold tracking-wider text-on-surface-variant ml-1">
+                <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
                   Email Address
                 </label>
-                <div className="input-glow relative bg-surface-container-lowest rounded-lg border border-outline-variant flex items-center transition-all duration-200">
-                  <span className="material-symbols-outlined absolute left-3.5 text-outline text-sm">
+                <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
+                  <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
                     mail
                   </span>
                   <input
@@ -156,29 +190,29 @@ export default function Auth() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-transparent border-none py-2.5 pl-10 pr-4 focus:ring-0 text-on-surface text-sm placeholder:text-outline/40 outline-none"
+                    className="w-full bg-transparent border-none py-3.5 pl-12 pr-4 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/50 outline-none"
                     placeholder="family@sentry.com"
                   />
                 </div>
               </div>
 
-              {/* Password Field */}
+              {/* Password Credentials Parameter Layout */}
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center px-1">
-                  <label className="text-[11px] font-semibold tracking-wider text-on-surface-variant">
+                  <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7]">
                     Password
                   </label>
                   {!isSignUp && (
                     <a
-                      className="text-[9px] font-semibold tracking-wider text-primary hover:underline transition-all"
+                      className="text-[10px] font-semibold text-[#b0c6ff] hover:underline transition-all"
                       href="#forgot"
                     >
                       FORGOT PASSWORD?
                     </a>
                   )}
                 </div>
-                <div className="input-glow relative bg-surface-container-lowest rounded-lg border border-outline-variant flex items-center transition-all duration-200">
-                  <span className="material-symbols-outlined absolute left-3.5 text-outline text-sm">
+                <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
+                  <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
                     lock
                   </span>
                   <input
@@ -186,76 +220,66 @@ export default function Auth() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-transparent border-none py-2.5 pl-10 pr-10 focus:ring-0 text-on-surface text-sm placeholder:text-outline/40 outline-none"
+                    className="w-full bg-transparent border-none py-3.5 pl-12 pr-12 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/50 outline-none"
                     placeholder="••••••••"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 text-outline hover:text-on-surface transition-colors"
+                    className="absolute right-4 text-[#8c90a0] hover:text-[#e5e2e1] transition-colors"
                   >
-                    <span className="material-symbols-outlined text-sm">
+                    <span className="material-symbols-outlined text-lg">
                       {showPassword ? "visibility_off" : "visibility"}
                     </span>
                   </button>
                 </div>
               </div>
 
-              {/* Signup Exclusive Fields Block (Confirm Password & Terms Checkbox) */}
+              {/* Conditional Registration Section Wrapper Block */}
               <div
-                className={`space-y-4 transition-all duration-300 ${isSignUp ? "block opacity-100" : "hidden opacity-0"}`}
+                className={`grid transition-all duration-500 ease-out ${
+                  isSignUp
+                    ? "grid-rows-[1fr] opacity-100 mt-4 mb-2"
+                    : "grid-rows-[0fr] opacity-0 pointer-events-none mt-0 mb-0"
+                }`}
               >
-                {/* 💡 New Confirm Password Field */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold tracking-wider text-on-surface-variant ml-1">
-                    Confirm Password
-                  </label>
-                  <div className="input-glow relative bg-surface-container-lowest rounded-lg border border-outline-variant flex items-center transition-all duration-200">
-                    <span className="material-symbols-outlined absolute left-3.5 text-outline text-sm">
-                      lock_reset
-                    </span>
-                    <input
-                      required={isSignUp}
-                      type={showPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full bg-transparent border-none py-2.5 pl-10 pr-4 focus:ring-0 text-on-surface text-sm placeholder:text-outline/40 outline-none"
-                      placeholder="••••••••"
-                    />
+                <div className="overflow-hidden space-y-4">
+                  {/* 1. Confirm Password Field */}
+                  <div className="space-y-1.5 transition-all duration-300 transform">
+                    <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
+                      Confirm Password
+                    </label>
+                    <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
+                      <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
+                        gpp_good
+                      </span>
+                      <input
+                        required={isSignUp}
+                        type={showPassword ? "text" : "password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full bg-transparent border-none py-3.5 pl-12 pr-4 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/50 outline-none"
+                        placeholder="••••••••"
+                      />
+                    </div>
                   </div>
                 </div>
-
-                {/* Privacy Policy Checkbox Container */}
-                <div className="flex items-start gap-2.5 px-1">
-                  <input
-                    type="checkbox"
-                    checked={agreeToTerms}
-                    onChange={(e) => setAgreeToTerms(e.target.checked)}
-                    required={isSignUp}
-                    className="mt-0.5 h-3.5 w-3.5 rounded bg-surface-container-lowest border-outline-variant text-primary focus:ring-primary focus:ring-offset-background"
-                  />
-                  <p className="text-xs text-on-surface-variant leading-tight">
-                    I agree to the{" "}
-                    <a
-                      className="text-secondary hover:underline"
-                      href="#privacy"
-                    >
-                      Privacy Sanctuary Agreement
-                    </a>
-                    .
-                  </p>
-                </div>
               </div>
-
-              {/* Submission Button */}
+              {/* Dynamic Core Submit Execution Action Button */}
               <button
                 type="submit"
-                className="w-full py-2.5 bg-primary text-on-primary rounded-xl font-semibold text-sm shadow-md shadow-primary/10 hover:scale-[1.01] active:scale-95 transition-all duration-200 mt-2"
+                className="w-full py-4 bg-[#b0c6ff] text-[#002d6e] rounded-xl font-bold text-base shadow-lg shadow-[#b0c6ff]/20 hover:scale-[1.02] active:scale-95 transition-all duration-200 mt-4"
               >
                 {isSignUp ? "Create Sanctuary" : "Access Vault"}
               </button>
             </form>
           </div>
+
+          {/* Global Cryptographic Context Security Badge Label */}
+          <p className="mt-6 text-center text-xs text-[#8c90a0]">
+            Encryption Status:{" "}
+            <span className="text-[#4edea3] font-bold">256-bit AES Active</span>
+          </p>
         </div>
       </div>
     </main>
