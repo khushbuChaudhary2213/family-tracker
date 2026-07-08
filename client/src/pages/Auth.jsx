@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -40,16 +40,6 @@ export default function Auth() {
           showMobileForm ? "hidden lg:flex" : "flex"
         }`}
       >
-        {/* Top Branding Header */}
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[#b0c6ff] text-2xl">
-            shield
-          </span>
-          <span className="text-[12px] font-semibold tracking-[0.08em] text-[#8c90a0] uppercase">
-            SECURE NETWORK
-          </span>
-        </div>
-
         {/* Center Descriptive Paragraph Block */}
         <div className="lg:my-auto space-y-6 max-w-md">
           <div className="w-16 h-16 bg-[#b0c6ff] rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(176,198,255,0.3)]">
@@ -179,11 +169,11 @@ export default function Auth() {
               {/* Email Address Parameter Layout */}
               <div className="space-y-1.5">
                 <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
-                  Email Address
+                  Phone Number
                 </label>
                 <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
                   <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
-                    mail
+                    phone
                   </span>
                   <input
                     required
@@ -191,7 +181,7 @@ export default function Auth() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-transparent border-none py-3.5 pl-12 pr-4 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/50 outline-none"
-                    placeholder="family@sentry.com"
+                    placeholder="123456XXXX"
                   />
                 </div>
               </div>

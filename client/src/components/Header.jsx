@@ -1,6 +1,12 @@
 function Header({ activeTab, onTriggerAuth, onSignOut }) {
   return (
-    <header className="flex items-center justify-between w-full border-b border-white/5 pb-6">
+    <header
+      className={`flex items-center justify-between w-full border-b border-white/5 pb-6 z-50 transition-all duration-200 ${
+        activeTab === "dashboard"
+          ? "fixed top-0 left-0 right-0 bg-[#0e0e0e]/90 backdrop-blur-md p-6 md:px-12 h-16"
+          : "absolute top-0 left-0 right-0 p-6 md:p-12 max-w-7xl mx-auto bg-transparent"
+      }`}
+    >
       <div className="flex items-center gap-2.5">
         <span className="material-symbols-outlined text-[#b0c6ff] text-2xl select-none">
           shield
@@ -10,7 +16,7 @@ function Header({ activeTab, onTriggerAuth, onSignOut }) {
         </span>
       </div>
 
-      {activeTab === "landing" && (
+      {activeTab === "" && (
         <nav className="flex items-center gap-6">
           <button
             onClick={() => onTriggerAuth("login")}
