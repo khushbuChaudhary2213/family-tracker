@@ -1,24 +1,65 @@
 import { useState } from "react";
+import signUpUser from "../apiFuncs/signUpUser";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function Auth() {
+  const { setUser } = useAuth();
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showMobileForm, setShowMobileForm] = useState(false);
 
   // State for controlled inputs
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const handleSignUp = async (phone, password, confirmPassword) => {
+    try {
+      const res = await signUpUser({
+        phoneNumber: phone,
+        password,
+        confirmPassword,
+      });
+
+      if (res && res.token) {
+        localStorage.setItem("token", res.token);
+        setUser(res.user);
+        setError("");
+
+        toast.success("Account created successfully! Welcome to Sentry.");
+        navigate("/dashboard");
+      } else {
+        const errorMsg = res?.message || "Signup failed. Please try again.";
+        setError(errorMsg);
+        toast.error(errorMsg);
+      }
+    } catch (err) {
+      console.log(err);
+      setError(err.message || "Something went wrong with the server.");
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError("");
     if (isSignUp) {
-      console.log("Registering account:", {
-        email,
-        password,
-      });
+      if (password != confirmPassword) {
+        setError("Passwords do not match!");
+        return;
+      }
+
+      const cleanedPhone = String(phone || "").replace(/\D/g, "");
+      if (cleanedPhone.length < 10) {
+        setError("Phone number must be exactly 10 digits.!");
+        return;
+      }
+      handleSignUp(phone, password, confirmPassword);
     } else {
-      console.log("Logging in:", { email, password });
+      console.log("Logging in:", { phone, password });
     }
   };
 
@@ -161,10 +202,16 @@ export default function Auth() {
               <div className="relative flex items-center py-2">
                 <div className="flex-grow border-t border-white/10"></div>
                 <span className="flex-shrink mx-4 text-[10px] font-semibold tracking-widest text-[#8c90a0]">
-                  OR EMAIL
+                  OR PHONE
                 </span>
                 <div className="flex-grow border-t border-white/10"></div>
               </div>
+
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold rounded-lg p-3.5 tracking-wide animate-pulse">
+                  {error}
+                </div>
+              )}
 
               {/* Email Address Parameter Layout */}
               <div className="space-y-1.5">
@@ -177,9 +224,9 @@ export default function Auth() {
                   </span>
                   <input
                     required
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     className="w-full bg-transparent border-none py-3.5 pl-12 pr-4 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/50 outline-none"
                     placeholder="123456XXXX"
                   />

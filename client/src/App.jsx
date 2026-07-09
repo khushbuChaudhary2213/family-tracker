@@ -8,6 +8,8 @@ import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "./layouts/DashboardLayout.jsx";
 import Map from "./components/Map.jsx";
 
+import { Toaster } from "react-hot-toast";
+
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -24,6 +26,24 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#131313] text-[#e5e2e1] antialiased [font-family:'Geist',sans-serif] relative overflow-x-hidden selection:bg-[#b0c6ff]/30">
+      {/* // For PopUps */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "#1e1e1e",
+            color: "#e5e2e1",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            fontSize: "14px",
+          },
+          success: {
+            iconTheme: {
+              primary: "#00a572",
+              secondary: "#1e1e1e",
+            },
+          },
+        }}
+      />
       {showHeader && (
         <Header
           activeTab={appState}

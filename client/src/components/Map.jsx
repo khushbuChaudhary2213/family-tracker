@@ -15,7 +15,7 @@ function Map() {
         Leaflet, OpenLayers, or Mapbox) will integrate.
       </p>
       <button
-        onClick={() => navigate("landing")}
+        onClick={() => navigate("/")}
         className="mt-6 px-4 py-2 bg-white/5 hover:bg-white/10 text-xs font-semibold rounded-lg text-[#8c90a0] hover:text-white transition-all"
       >
         Sign Out / Reset Demo

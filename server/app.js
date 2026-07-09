@@ -3,6 +3,7 @@ const { errorMiddleware } = require("./middleware/errorMiddleware");
 const userRoutes = require("./routes/userRoutes");
 const familyRoutes = require("./routes/familyRoute");
 const locationRoutes = require("./routes/locationRoute");
+const cors = require("cors");
 
 const app = express();
 
@@ -14,6 +15,13 @@ app.use(express.json());
 //     message: "Hello from Server!",
 //   });
 // });
+
+app.use(
+  cors({
+    origin: process.env.VITE_FRONTEND_URL,
+    credentials: true,
+  }),
+);
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/family", familyRoutes);

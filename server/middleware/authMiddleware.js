@@ -36,7 +36,7 @@ exports.protect = async (req, res, next) => {
     }
 
     req.user = currentUser;
-    console.log(`Logged in user: ${req.user}`);
+    // console.log(`Logged in user: ${req.user}`);
 
     next();
   } catch (err) {

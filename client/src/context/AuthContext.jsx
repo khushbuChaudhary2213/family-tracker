@@ -1,16 +1,23 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import getCurrentUser from "../api/getCurrentUser";
+import getCurrentUser from "../apiFuncs/getCurrentUser";
 
 const AuthContext = createContext();
 
-function AuthProvider({ children }) {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function checkAuth() {
+      // const token = localStorage.getItem("token");
+      // if (!token) {
+      //   setUser(null);
+      //   setIsLoading(false);
+      //   return;
+      // }
       try {
         const currentUser = await getCurrentUser();
+        console.log(currentUser);
         setUser(currentUser);
       } catch (err) {
         console.log(err);
@@ -23,9 +30,13 @@ function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
-  return <AuthContext.Provider value={user, isLoading, setUser}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ user, isLoading, setUser }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export function useAuth(){
-  return useContext(AuthContext)
+export function useAuth() {
+  return useContext(AuthContext);
 }
