@@ -7,6 +7,7 @@ import DashboardLayout from "./layouts/DashboardLayout.jsx";
 import Auth from "./pages/Auth.jsx";
 
 import { Toaster } from "react-hot-toast";
+import OnboardingCrossroads from "./pages/OnboardingCrossroads.jsx";
 
 export default function App() {
   const location = useLocation();
@@ -92,17 +93,10 @@ export default function App() {
         {/* ================= STATE 3: INTERACTIVE PROTECTED HUB ================= */}
 
         <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Map />} />
+          <Route index element={<OnboardingCrossroads />} />
+          <Route path="map" element={<Map />} />
         </Route>
       </Routes>
-      <div className="absolute inset-0 z-0 opacity-15 pointer-events-none select-none">
-        <div
-          className="w-full h-full bg-cover bg-center mix-blend-luminosity"
-          style={{
-            backgroundImage: "url('/img/kobu-agency-o8ZesB0MLFo-unsplash.jpg')",
-          }}
-        ></div>
-      </div>
     </div>
   );
 }

@@ -59,7 +59,7 @@ export default function Auth() {
 
         setError("");
         toast.success("Access Granted. Welcome back to the SENTRY!");
-        navigate("/dashboad");
+        navigate("/dashboard");
       } else {
         toast.error("Authentication failed.");
       }
@@ -134,18 +134,6 @@ export default function Auth() {
                 privileges under strict 256-bit AES protection matrices.
               </p>
             </div>
-
-            {/* Mobile Navigation Trigger Button (Visible only below 1024px screen dimensions) */}
-            <button
-              type="button"
-              onClick={() => setShowMobileForm(true)}
-              className="lg:hidden shrink-0 flex items-center justify-center gap-2 px-4 py-3 bg-[#b0c6ff] text-[#002d6e] rounded-xl font-bold text-xs tracking-wider shadow-lg shadow-[#b0c6ff]/20 hover:scale-[1.02] active:scale-95 transition-all duration-200"
-            >
-              CONTINUE
-              <span className="material-symbols-outlined text-sm font-bold">
-                arrow_forward
-              </span>
-            </button>
           </div>
         </div>
 
