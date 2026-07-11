@@ -3,6 +3,7 @@ import signUpUser from "../apiFuncs/signUpUser";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
+import loginUser from "../apiFuncs/loginUser";
 
 export default function Auth() {
   const { setUser } = useAuth();
@@ -14,7 +15,6 @@ export default function Auth() {
   const [error, setError] = useState("");
   const [isSignUp, setIsSignUp] = useState(incomingMode === "signup");
   const [showPassword, setShowPassword] = useState(false);
-  // const [showMobileForm, setShowMobileForm] = useState(false);
 
   useEffect(() => {
     setIsSignUp(incomingMode === "signup");
@@ -42,7 +42,6 @@ export default function Auth() {
         navigate("/dashboard");
       } else {
         const errorMsg = res?.message || "Signup failed. Please try again.";
-        setError(errorMsg);
         toast.error(errorMsg);
       }
     } catch (err) {
@@ -51,23 +50,49 @@ export default function Auth() {
     }
   };
 
+  const handleLogin = async (phone, password) => {
+    try {
+      const res = await loginUser({ phoneNumber: phone, password });
+
+      if (res && res.token) {
+        localStorage.setItem("token", res.token);
+
+        setError("");
+        toast.success("Access Granted. Welcome back to the SENTRY!");
+        navigate("/dashboad");
+      } else {
+        toast.error("Authentication failed.");
+      }
+    } catch (err) {
+      console.error("Login catch triggered: ", err);
+      const errorMsg =
+        err.response?.data?.message ||
+        "Invalid credentials or network failure.";
+      toast.error(errorMsg);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
+
+    const cleanedPhone = String(phone || "").replace(/\D/g, "");
+    if (cleanedPhone.length < 10) {
+      setError("Phone number must be exactly 10 digits.!");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Password must be of at least 6 chars.!");
+      return;
+    }
     if (isSignUp) {
       if (password != confirmPassword) {
         setError("Passwords do not match!");
         return;
       }
-
-      const cleanedPhone = String(phone || "").replace(/\D/g, "");
-      if (cleanedPhone.length < 10) {
-        setError("Phone number must be exactly 10 digits.!");
-        return;
-      }
       handleSignUp(phone, password, confirmPassword);
     } else {
-      console.log("Logging in:", { phone, password });
+      handleLogin(phone, password);
     }
   };
 
