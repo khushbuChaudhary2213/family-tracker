@@ -1,12 +1,10 @@
-import { useState } from "react";
-import Header from "./components/Header.jsx";
-import Sidebar from "./components/Sidebar.jsx";
-import Hero from "./components/Hero.jsx";
-import Footer from "./components/Footer.jsx";
-import Auth from "./pages/Auth.jsx";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import DashboardLayout from "./layouts/DashboardLayout.jsx";
+import Footer from "./components/Footer.jsx";
+import Header from "./components/Header.jsx";
+import Hero from "./components/Hero.jsx";
 import Map from "./components/Map.jsx";
+import DashboardLayout from "./layouts/DashboardLayout.jsx";
+import Auth from "./pages/Auth.jsx";
 
 import { Toaster } from "react-hot-toast";
 
@@ -28,13 +26,18 @@ export default function App() {
     <div className="min-h-screen bg-[#131313] text-[#e5e2e1] antialiased [font-family:'Geist',sans-serif] relative overflow-x-hidden selection:bg-[#b0c6ff]/30">
       {/* // For PopUps */}
       <Toaster
-        position="top-right"
+        position="top-center"
         toastOptions={{
           style: {
             background: "#1e1e1e",
             color: "#e5e2e1",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            fontSize: "14px",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            fontSize: "16px",
+            fontWeight: "500",
+            padding: "16px 28px",
+            maxWidth: "500px",
+            borderRadius: "12px",
+            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.5)",
           },
           success: {
             iconTheme: {

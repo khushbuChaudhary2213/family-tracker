@@ -1,16 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import signUpUser from "../apiFuncs/signUpUser";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Auth() {
   const { setUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const incomingMode = location.state?.initialMode || "login";
+
   const [error, setError] = useState("");
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(incomingMode === "signup");
   const [showPassword, setShowPassword] = useState(false);
-  const [showMobileForm, setShowMobileForm] = useState(false);
+  // const [showMobileForm, setShowMobileForm] = useState(false);
+
+  useEffect(() => {
+    setIsSignUp(incomingMode === "signup");
+  }, [incomingMode]);
 
   // State for controlled inputs
   const [phone, setPhone] = useState("");
@@ -76,11 +84,7 @@ export default function Auth() {
       </div>
 
       {/* ================= LEFT SIDE: BRANDING, LAYOUT PARAGRAPH & MOBILE TRIGGER ================= */}
-      <div
-        className={`z-10 lg:col-span-5 flex flex-col justify-between p-6 md:p-12 border-b lg:border-b-0 lg:border-r border-white/5 bg-[#0e0e0e]/40 backdrop-blur-md gap-8 lg:gap-0 ${
-          showMobileForm ? "hidden lg:flex" : "flex"
-        }`}
-      >
+      <div className="hidden lg:flex z-10 lg:col-span-5 flex-col justify-between p-6 md:p-12 border-r border-white/5 bg-[#0e0e0e]/40 backdrop-blur-md">
         {/* Center Descriptive Paragraph Block */}
         <div className="lg:my-auto space-y-6 max-w-md">
           <div className="w-16 h-16 bg-[#b0c6ff] rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(176,198,255,0.3)]">
@@ -128,14 +132,10 @@ export default function Auth() {
       </div>
 
       {/* ================= RIGHT SIDE: AUTHENTICATION INTERACTIVE FORM ================= */}
-      <div
-        className={`z-10 lg:col-span-7 items-center justify-center p-6 md:p-12 lg:overflow-y-auto lg:h-full ${
-          showMobileForm ? "flex" : "hidden lg:flex"
-        }`}
-      >
+      <div className="z-10 col-span-1 lg:col-span-7 flex items-center justify-center p-6 md:p-12 lg:overflow-y-auto lg:h-full">
         <div className="w-full max-w-[440px] lg:my-auto auth-card perspective-1000">
           {/* Mobile Back/Return Navigation Anchor Link */}
-          <button
+          {/* <button
             type="button"
             onClick={() => setShowMobileForm(false)}
             className="lg:hidden flex items-center gap-1.5 text-xs font-semibold text-[#8c90a0] hover:text-[#e5e2e1] mb-5 transition-colors"
@@ -144,7 +144,7 @@ export default function Auth() {
               arrow_back
             </span>
             Back to Overview
-          </button>
+          </button> */}
 
           {/* Master Glass Panel Card Container */}
           <div className="backdrop-blur-[20px] bg-[#1e1e1e]/70 border border-white/10 rounded-xl p-6 md:p-8 shadow-2xl">

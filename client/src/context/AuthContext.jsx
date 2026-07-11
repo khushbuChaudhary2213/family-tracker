@@ -9,19 +9,24 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     async function checkAuth() {
-      // const token = localStorage.getItem("token");
-      // if (!token) {
-      //   setUser(null);
-      //   setIsLoading(false);
-      //   return;
-      // }
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const currentUser = await getCurrentUser();
-        console.log(currentUser);
-        setUser(currentUser);
+        const res = await getCurrentUser();
+        if (res && res.user) {
+          console.log(res);
+          setUser(res.user);
+        } else {
+          handleLogout();
+        }
       } catch (err) {
         console.log(err);
-        setUser(null);
+        handleLogout();
       } finally {
         setIsLoading(false);
       }
@@ -30,13 +35,22 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, setUser }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, setUser, logout: handleLogout }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within an AuthProvider.");
+  return context;
 }
