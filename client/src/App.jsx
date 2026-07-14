@@ -10,6 +10,7 @@ import PrivateRoute from "./utils/PrivateRoute.jsx";
 
 import { Toaster } from "react-hot-toast";
 import OnboardingCrossroads from "./pages/OnboardingCrossroads.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 export default function App() {
   const location = useLocation();
@@ -121,6 +122,9 @@ export default function App() {
           <Route index element={<OnboardingCrossroads />} />
           <Route path="map" element={<Map />} />
         </Route>
+
+        {/* === GLOBAL CATCH-ALL ROUTE (MUST BE LAST) === */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
