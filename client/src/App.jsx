@@ -11,10 +11,12 @@ import PrivateRoute from "./utils/PrivateRoute.jsx";
 import { Toaster } from "react-hot-toast";
 import OnboardingCrossroads from "./pages/OnboardingCrossroads.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import { useAuth } from "./context/AuthContext.jsx";
 
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const showHeader = location.pathname != "/auth";
 
@@ -55,7 +57,7 @@ export default function App() {
         <Header
           activeTab={appState}
           onTriggerAuth={handleTriggerAuth}
-          onSignOut={() => navigate("/")}
+          onSignOut={logout}
         />
       )}
       {/* ================= STATE 1: PUBLIC LANDING PAGE ================= */}
