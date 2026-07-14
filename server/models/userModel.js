@@ -3,6 +3,11 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = mongoose.Schema(
   {
+    name: {
+      type: String,
+      trim: true,
+      required: true,
+    },
     phoneNumber: {
       type: String,
       required: [true, "Please enter your mobile no!"],

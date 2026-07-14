@@ -22,12 +22,14 @@ export default function Auth() {
 
   // State for controlled inputs
   const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSignUp = async (phone, password, confirmPassword) => {
+  const handleSignUp = async (name, phone, password, confirmPassword) => {
     try {
       const res = await signUpUser({
+        name,
         phoneNumber: phone,
         password,
         confirmPassword,
@@ -93,7 +95,7 @@ export default function Auth() {
         setError("Passwords do not match!");
         return;
       }
-      handleSignUp(phone, password, confirmPassword);
+      handleSignUp(name, phone, password, confirmPassword);
     } else {
       handleLogin(phone, password);
     }
@@ -228,6 +230,33 @@ export default function Auth() {
                   {error}
                 </div>
               )}
+
+              <div
+                className={`grid transition-all duration-500 ease-out ${
+                  isSignUp
+                    ? "grid-rows-[1fr] opacity-100 mt-2 mb-2"
+                    : "grid-rows-[0fr] opacity-0 pointer-events-none mt-0 mb-0"
+                }`}
+              >
+                <div className="overflow-hidden space-y-1.5">
+                  <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
+                    Name
+                  </label>
+                  <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
+                    <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
+                      person
+                    </span>
+                    <input
+                      required={isSignUp}
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full bg-transparent border-none py-3.5 pl-12 pr-4 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/30 outline-none"
+                      placeholder="Alex Mercer"
+                    />
+                  </div>
+                </div>
+              </div>
 
               {/* Email Address Parameter Layout */}
               <div className="space-y-1.5">

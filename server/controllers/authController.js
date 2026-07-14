@@ -5,7 +5,7 @@ const signToken = require("../utils/signToken.js");
 
 exports.register = async (req, res, next) => {
   try {
-    const { phoneNumber, password, confirmPassword } = req.body;
+    const { name, phoneNumber, password, confirmPassword } = req.body;
 
     if (password != confirmPassword)
       return next(
@@ -20,6 +20,7 @@ exports.register = async (req, res, next) => {
     }
 
     const newUser = await User.create({
+      name,
       phoneNumber,
       password,
       confirmPassword,
