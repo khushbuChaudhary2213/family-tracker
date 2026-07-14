@@ -35,7 +35,8 @@ export default function Auth() {
 
       if (res && res.token) {
         localStorage.setItem("token", res.token);
-        setUser(res.user);
+        // console.log(res);
+        setUser(res.data.user);
         setError("");
 
         toast.success("Account created successfully! Welcome to Sentry.");
@@ -56,8 +57,10 @@ export default function Auth() {
 
       if (res && res.token) {
         localStorage.setItem("token", res.token);
-
+        // console.log(res);
+        setUser(res.data.user);
         setError("");
+
         toast.success("Access Granted. Welcome back to the SENTRY!");
         navigate("/dashboard");
       } else {

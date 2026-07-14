@@ -4,7 +4,10 @@ import getCurrentUser from "../apiFuncs/getCurrentUser";
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const token = localStorage.getItem("token");
+    return token ? { placeholder: true } : null;
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -15,18 +18,19 @@ export function AuthProvider({ children }) {
         setIsLoading(false);
         return;
       }
+      // console.log("Token:", token);
 
       try {
         const res = await getCurrentUser();
         if (res && res.user) {
-          console.log(res);
+          // console.log(res);
           setUser(res.user);
         } else {
-          handleLogout();
+          console.log(res);
         }
       } catch (err) {
         console.log(err);
-        handleLogout();
+        // handleLogout();
       } finally {
         setIsLoading(false);
       }

@@ -1,7 +1,12 @@
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import { useAuth } from "../context/AuthContext";
 
 function DashboardLayout() {
+  const { user } = useAuth();
+
+  // Extra safety fallback: If no user managed to slip past the guard, boot them out
+  if (!user) return <Navigate to="/auth" replace />;
   return (
     <div className="min-h-screen flex relative bg-[#131313]">
       {/* App Side Drawer Navigation */}

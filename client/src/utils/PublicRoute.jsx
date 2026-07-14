@@ -5,7 +5,7 @@ function PublicRoute({ children }) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) return null;
-  return !user ? children : <Navigate to="/"></Navigate>;
+  return !user ? children : <Navigate to="/dashboard"></Navigate>;
 }
 
 export default PublicRoute;

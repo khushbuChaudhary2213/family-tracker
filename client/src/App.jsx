@@ -5,6 +5,8 @@ import Hero from "./components/Hero.jsx";
 import Map from "./components/Map.jsx";
 import DashboardLayout from "./layouts/DashboardLayout.jsx";
 import Auth from "./pages/Auth.jsx";
+import PublicRoute from "./utils/PublicRoute.jsx";
+import PrivateRoute from "./utils/PrivateRoute.jsx";
 
 import { Toaster } from "react-hot-toast";
 import OnboardingCrossroads from "./pages/OnboardingCrossroads.jsx";
@@ -52,7 +54,7 @@ export default function App() {
         <Header
           activeTab={appState}
           onTriggerAuth={handleTriggerAuth}
-          onSignOut={() => navigate("/landing")}
+          onSignOut={() => navigate("/")}
         />
       )}
       {/* ================= STATE 1: PUBLIC LANDING PAGE ================= */}
@@ -60,39 +62,62 @@ export default function App() {
         <Route
           path="/"
           element={
-            <div className="relative min-h-screen flex flex-col justify-between p-6 md:p-12 max-w-7xl mx-auto z-10">
-              <Hero onTriggerAuth={handleTriggerAuth} />
-              <Footer />
-            </div>
+            <PublicRoute>
+              <div className="relative min-h-screen w-full">
+                <div className="absolute inset-0 z-0 opacity-20 pointer-events-none select-none">
+                  <div
+                    className="w-full h-full bg-cover bg-center"
+                    style={{
+                      backgroundImage:
+                        "url('/img/kobu-agency-o8ZesB0MLFo-unsplash.jpg')",
+                    }}
+                  ></div>
+                </div>
+                <div className="relative min-h-screen flex flex-col justify-between p-6 md:p-12 max-w-7xl mx-auto z-10">
+                  <Hero onTriggerAuth={handleTriggerAuth} />
+                  <Footer />
+                </div>
+              </div>
+            </PublicRoute>
           }
         />
 
-        {/* ================= STATE 2: AUTHENTICATION INNER GATEWAY ================= */}
+        {/* ================= STATE 2: AUTHENTICATION ROUTE ================= */}
+
         <Route
           path="/auth"
           element={
-            <div className="animate-fade-in relative z-10">
-              {/* Note: Pass authMode as prop down to form state if your Auth card needs it, 
+            <PublicRoute>
+              <div className="animate-fade-in relative z-10">
+                {/* Note: Pass authMode as prop down to form state if your Auth card needs it, 
               and handle simulated success using standard callback events */}
-              <Auth
-                initialMode={"login"}
-                onBackToLanding={() => navigate("/")}
-                onAuthSuccess={() => navigate("/dashboard")}
-              />
+                <Auth
+                  initialMode={"login"}
+                  onBackToLanding={() => navigate("/")}
+                  onAuthSuccess={() => navigate("/dashboard")}
+                />
 
-              <button
-                onClick={() => navigate("/dashboard")}
-                className="fixed bottom-4 right-4 bg-[#00a572] text-xs font-bold text-black px-3 py-2 rounded-md opacity-30 hover:opacity-100 z-50 transition-opacity"
-              >
-                Dev Bypass to Dashboard →
-              </button>
-            </div>
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="fixed bottom-4 right-4 bg-[#00a572] text-xs font-bold text-black px-3 py-2 rounded-md opacity-30 hover:opacity-100 z-50 transition-opacity"
+                >
+                  Dev Bypass to Dashboard →
+                </button>
+              </div>
+            </PublicRoute>
           }
         />
 
-        {/* ================= STATE 3: INTERACTIVE PROTECTED HUB ================= */}
+        {/* ================= STATE 3: MAIN DASHBOARD ROUTE ================= */}
 
-        <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DashboardLayout />
+            </PrivateRoute>
+          }
+        >
           <Route index element={<OnboardingCrossroads />} />
           <Route path="map" element={<Map />} />
         </Route>
