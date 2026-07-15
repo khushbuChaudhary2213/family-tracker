@@ -45,7 +45,7 @@ exports.createFamily = async (req, res, next) => {
 
 exports.joinFamily = async (req, res, next) => {
   try {
-    const { inviteCode } = req.body;
+    const { inviteCode } = req.params;
     const family = await Family.findOne({ inviteCode });
     if (!family) {
       return next(new ErrorHandler(404, "Family not found!"));
@@ -90,7 +90,7 @@ exports.joinFamily = async (req, res, next) => {
       success: true,
       message: "User Joined family successfully!",
       data: {
-        family,
+        familyId: family._id,
         joinedUser,
       },
     });
@@ -113,6 +113,7 @@ exports.getFamilyInfo = async (req, res, next) => {
       .filter((m) => m.user) // Safety check in case a user was deleted from the DB
       .map((m) => ({
         _id: m.user._id,
+        name: m.user.name || "Sentry User",
         phoneNumber: m.user.phoneNumber,
       }));
 
@@ -120,6 +121,7 @@ exports.getFamilyInfo = async (req, res, next) => {
     const formattedAdmins = admins.map((admin) => ({
       _id: admin.user._id.toString(),
       phoneNumber: admin.user.phoneNumber,
+      name: m.user.name || "Sentry User",
     }));
 
     res.status(200).json({

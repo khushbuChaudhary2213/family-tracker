@@ -8,7 +8,7 @@ const router = express.Router();
 router.use(authMiddleware.protect);
 
 router.post("/createFamily", familyController.createFamily);
-router.post("/joinFamily", familyController.joinFamily);
+router.post("/joinFamily/:inviteCode", familyController.joinFamily);
 
 router.get("/me", familyController.getFamilyInfo);
 
