@@ -4,9 +4,11 @@ import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
 import loginUser from "../apiFuncs/loginUser";
+import getCurrentUser from "../apiFuncs/getCurrentUser";
+import joinFamily from "../apiFuncs/joinFamily";
 
 export default function Auth() {
-  const { setUser } = useAuth();
+  const { initializeSession } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -37,19 +39,24 @@ export default function Auth() {
 
       if (res && res.token) {
         localStorage.setItem("token", res.token);
-        // console.log(res);
-        setUser(res.data.user);
-        setError("");
+        await initializeSession(res.data.user);
 
         toast.success("Account created successfully! Welcome to Sentry.");
-        navigate("/dashboard");
+
+        const pendingInvite = localStorage.getItem("pendingInvite");
+        if (pendingInvite) {
+          navigate(`/join/${pendingInvite}`, { replace: true });
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         const errorMsg = res?.message || "Signup failed. Please try again.";
         toast.error(errorMsg);
       }
     } catch (err) {
-      console.log(err);
-      setError(err.message || "Something went wrong with the server.");
+      const errMsg =
+        err.response?.data?.message || "Signup failed. Please try again.";
+      toast.error(errMsg);
     }
   };
 
@@ -60,11 +67,21 @@ export default function Auth() {
       if (res && res.token) {
         localStorage.setItem("token", res.token);
         // console.log(res);
-        setUser(res.data.user);
-        setError("");
 
-        toast.success("Access Granted. Welcome back to the SENTRY!");
-        navigate("/dashboard");
+        const pendingInvite = localStorage.getItem("pendingInvite");
+        if (pendingInvite) {
+          const res = await joinFamily(pendingInvite);
+          console.log(res);
+          if (res) {
+            await initializeSession(res.data.user);
+            toast.success(
+              "Successfully joined the family! Access Granted. Welcome back to the SENTRY!",
+            );
+          }
+        } else {
+          toast.success("Access Granted. Welcome back to the SENTRY!");
+          navigate("/dashboard");
+        }
       } else {
         toast.error("Authentication failed.");
       }

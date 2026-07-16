@@ -12,6 +12,7 @@ import { Toaster } from "react-hot-toast";
 import OnboardingCrossroads from "./pages/OnboardingCrossroads.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
+import JoinFamily from "./pages/JoinFamily.jsx";
 
 export default function App() {
   const location = useLocation();
@@ -124,6 +125,8 @@ export default function App() {
           <Route index element={<OnboardingCrossroads />} />
           <Route path="map" element={<Map />} />
         </Route>
+
+        <Route path="/join/:inviteCode" element={<JoinFamily />} />
 
         {/* === GLOBAL CATCH-ALL ROUTE (MUST BE LAST) === */}
         <Route path="*" element={<NotFound />} />

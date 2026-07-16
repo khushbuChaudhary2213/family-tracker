@@ -90,7 +90,7 @@ exports.joinFamily = async (req, res, next) => {
       success: true,
       message: "User Joined family successfully!",
       data: {
-        familyId: family._id,
+        joinedFamily: family,
         joinedUser,
       },
     });
@@ -107,7 +107,15 @@ exports.getFamilyInfo = async (req, res, next) => {
       "members.user": user._id,
     }).populate("members.user", "phoneNumber");
 
-    if (!family) return next(new ErrorHandler(404, "Family not found!"));
+    if (!family) {
+      return res.status(200).json({
+        success: true,
+        message: "No family associated with this user yet.",
+        data: {
+          family: null,
+        },
+      });
+    }
 
     const formattedMembers = family.members
       .filter((m) => m.user) // Safety check in case a user was deleted from the DB
@@ -121,17 +129,20 @@ exports.getFamilyInfo = async (req, res, next) => {
     const formattedAdmins = admins.map((admin) => ({
       _id: admin.user._id.toString(),
       phoneNumber: admin.user.phoneNumber,
-      name: m.user.name || "Sentry User",
+      name: admin.user.name || "Sentry User",
     }));
 
     res.status(200).json({
       success: true,
       message: "Family fetched successfully",
       data: {
-        familyName: family.familyName,
-        inviteCode: family.inviteCode,
-        admins: formattedAdmins,
-        members: formattedMembers,
+        family: {
+          familyId: family._id,
+          familyName: family.familyName,
+          inviteCode: family.inviteCode,
+          admins: formattedAdmins,
+          members: formattedMembers,
+        },
       },
     });
   } catch (err) {
