@@ -39,20 +39,35 @@ export default function Auth() {
 
       if (res && res.token) {
         localStorage.setItem("token", res.token);
-        await initializeSession(res.data.user);
+        setError("");
 
-        toast.success("Account created successfully! Welcome to Sentry.");
+        const updatedUser = await initializeSession(res.data.user);
 
         const pendingInvite = localStorage.getItem("pendingInvite");
+
         if (pendingInvite) {
-          navigate(`/join/${pendingInvite}`, { replace: true });
-        } else {
-          navigate("/dashboard");
+          const currentFamilyId =
+            updatedUser?.family?.familyId || updatedUser?.family?._id;
+
+          // For a brand new user, this will hit immediately
+          if (!currentFamilyId) {
+            toast.success(
+              "Account created! Connecting you to the family network...",
+            );
+            navigate(`/join/${pendingInvite}`, { replace: true });
+            return; // Terminate early so we don't flash the dashboard view
+          } else {
+            localStorage.removeItem("pendingInvite");
+          }
         }
+
+        toast.success("Account created successfully! Welcome to Sentry.");
+        navigate("/dashboard", { replace: true });
       } else {
         const errorMsg = res?.message || "Signup failed. Please try again.";
         toast.error(errorMsg);
       }
+      toast.success("Account created successfully! Welcome to Sentry.");
     } catch (err) {
       const errMsg =
         err.response?.data?.message || "Signup failed. Please try again.";
@@ -66,22 +81,33 @@ export default function Auth() {
 
       if (res && res.token) {
         localStorage.setItem("token", res.token);
+        setError("");
         // console.log(res);
 
+        const updatedUser = await initializeSession(res.data.user);
+
         const pendingInvite = localStorage.getItem("pendingInvite");
+
+        // 2. Check if there is an active invite pending evaluation
         if (pendingInvite) {
-          const res = await joinFamily(pendingInvite);
-          console.log(res);
-          if (res) {
-            await initializeSession(res.data.user);
+          const currentFamilyId =
+            updatedUser?.family?.familyId || updatedUser?.family?._id;
+
+          if (!currentFamilyId) {
             toast.success(
-              "Successfully joined the family! Access Granted. Welcome back to the SENTRY!",
+              "Authentication verified. Redirecting to join network...",
             );
+            navigate(`/join/${pendingInvite}`, { replace: true });
+            return;
+          } else {
+            // User is already a member of a circle, discard the invite cleanly
+            localStorage.removeItem("pendingInvite");
           }
-        } else {
-          toast.success("Access Granted. Welcome back to the SENTRY!");
-          navigate("/dashboard");
         }
+
+        // 3. Fallback standard redirect if no conditional overrides triggered
+        toast.success("Access Granted. Welcome back to the SENTRY!");
+        navigate("/dashboard", { replace: true });
       } else {
         toast.error("Authentication failed.");
       }
