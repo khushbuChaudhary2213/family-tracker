@@ -99,50 +99,119 @@ exports.joinFamily = async (req, res, next) => {
   }
 };
 
+/////////////////////////////////
+// FOR FETCHING ONLY ONE FAMILY
+////////////////////////////////
+
+// exports.getFamilyInfo = async (req, res, next) => {
+//   try {
+//     const user = req.user;
+
+//     const family = await Family.findOne({
+//       "members.user": user._id,
+//     }).populate("members.user", "phoneNumber");
+
+//     if (!family) {
+//       return res.status(200).json({
+//         success: true,
+//         message: "No family associated with this user yet.",
+//         data: {
+//           family: null,
+//         },
+//       });
+//     }
+
+//     const formattedMembers = family.members
+//       .filter((m) => m.user) // Safety check in case a user was deleted from the DB
+//       .map((m) => ({
+//         _id: m.user._id,
+//         name: m.user.name || "Sentry User",
+//         phoneNumber: m.user.phoneNumber,
+//       }));
+
+//     const admins = roleMembers(family, "admin");
+//     const formattedAdmins = admins.map((admin) => ({
+//       _id: admin.user._id.toString(),
+//       phoneNumber: admin.user.phoneNumber,
+//       name: admin.user.name || "Sentry User",
+//     }));
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Family fetched successfully",
+//       data: {
+//         family: {
+//           familyId: family._id,
+//           familyName: family.familyName,
+//           inviteCode: family.inviteCode,
+//           admins: formattedAdmins,
+//           members: formattedMembers,
+//         },
+//       },
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 exports.getFamilyInfo = async (req, res, next) => {
   try {
     const user = req.user;
 
-    const family = await Family.findOne({
+    // 1. Find ALL families where the user is listed in the members sub-document array
+    // We populate the nested user object within the members array
+    const families = await Family.find({
       "members.user": user._id,
-    }).populate("members.user", "phoneNumber");
+    }).populate("members.user", "phoneNumber name"); // Populate necessary user fields
 
-    if (!family) {
+    // 2. Handle the scenario where the user hasn't created or joined any family
+    if (!families || families.length === 0) {
       return res.status(200).json({
         success: true,
-        message: "No family associated with this user yet.",
+        message: "No families associated with this user yet.",
         data: {
-          family: null,
+          families: [], // Return an empty array
         },
       });
     }
 
-    const formattedMembers = family.members
-      .filter((m) => m.user) // Safety check in case a user was deleted from the DB
-      .map((m) => ({
-        _id: m.user._id,
-        name: m.user.name || "Sentry User",
-        phoneNumber: m.user.phoneNumber,
-      }));
+    // 3. Format every family found in the list
+    const formattedFamilies = families.map((family) => {
+      // Format all members safely
+      const formattedMembers = family.members
+        .filter((m) => m.user) // Safety check for deleted users
+        .map((m) => ({
+          _id: m.user._id,
+          name: m.user.name || "Sentry User",
+          phoneNumber: m.user.phoneNumber,
+        }));
 
-    const admins = roleMembers(family, "admin");
-    const formattedAdmins = admins.map((admin) => ({
-      _id: admin.user._id.toString(),
-      phoneNumber: admin.user.phoneNumber,
-      name: admin.user.name || "Sentry User",
-    }));
+      // Format all admins using your helper function
+      const admins = roleMembers(family, "admin");
+      const formattedAdmins = admins
+        .filter((admin) => admin.user) // Safety check
+        .map((admin) => ({
+          _id: admin.user._id.toString(),
+          phoneNumber: admin.user.phoneNumber,
+          name: admin.user.name || "Sentry User",
+        }));
 
+      // Map to the exact nested structure your frontend components expect
+      return {
+        familyId: family._id,
+        familyName: family.familyName,
+        inviteCode: family.inviteCode,
+        admins: formattedAdmins,
+        members: formattedMembers,
+      };
+    });
+
+    // 4. Return the complete list of formatted families
     res.status(200).json({
       success: true,
-      message: "Family fetched successfully",
+      message: "Families fetched successfully",
       data: {
-        family: {
-          familyId: family._id,
-          familyName: family.familyName,
-          inviteCode: family.inviteCode,
-          admins: formattedAdmins,
-          members: formattedMembers,
-        },
+        families: formattedFamilies, // Frontend will map over this list
       },
     });
   } catch (err) {

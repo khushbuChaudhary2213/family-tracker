@@ -9,18 +9,48 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem("token");
     return token ? { placeholder: true } : null;
   });
+  const [families, setFamilies] = useState([]);
+  const [activeFamily, setActiveFamily] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const switchActiveFamily = (familyId) => {
+    const selected = families.find((f) => f.familyId === familyId);
+    if (selected) {
+      setActiveFamily(selected);
+      localStorage.setItem("activeFamilyId", familyId);
+    }
+  };
   const initializeSession = async (userData) => {
     try {
       const familyRes = await fetchFamily();
       // console.log(familyRes);
+
       // Safely dig out the family node depending on if your api wrapper strips data layers
-      const familyData = familyRes?.data?.family || familyRes?.data || null;
+      const fetchedFamilies =
+        familyRes?.data?.families || familyRes?.data || [];
+      console.log(fetchedFamilies);
+
+      const savedActiveId = localStorage.getItem("activeFamilyId");
+
+      const foundActive = fetchedFamilies.find(
+        (f) => f.familyId === savedActiveId,
+      );
+
+      let currentActive = null;
+      if (foundActive) {
+        currentActive = foundActive;
+      } else if (fetchedFamilies.length > 0) {
+        // Default to the first family if no saved selection exists
+        currentActive = fetchedFamilies[0];
+        localStorage.setItem("activeFamilyId", fetchedFamilies[0].familyId);
+      }
+
+      setFamilies(fetchedFamilies);
+      setActiveFamily(currentActive);
 
       const unifiedUserState = {
         ...userData,
-        family: familyData,
+        family: currentActive,
       };
 
       console.log(unifiedUserState);
@@ -28,6 +58,8 @@ export function AuthProvider({ children }) {
       return unifiedUserState;
     } catch (err) {
       console.error("Session orchestration mapping failure:", err);
+      setFamilies([]);
+      setActiveFamily(null);
       setUser({ ...userData, family: null });
     }
   };
@@ -62,9 +94,21 @@ export function AuthProvider({ children }) {
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    if (user && user.placeholder === undefined) {
+      setUser((prev) => ({
+        ...prev,
+        family: activeFamily,
+      }));
+    }
+  }, [activeFamily]);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("activeFamilyId");
     setUser(null);
+    setFamilies([]);
+    setActiveFamily(null);
   };
 
   // const updateProfileContext = (updatedData) => {
@@ -75,6 +119,9 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         user,
+        families,
+        activeFamily,
+        switchActiveFamily,
         isLoading,
         setUser,
         logout: handleLogout,

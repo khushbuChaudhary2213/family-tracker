@@ -44,10 +44,6 @@ export default function OnboardingCrossroads() {
         // console.log(res);
         toast.success(`${newFamily.familyName} created successfully!`);
 
-        // setUser((prevUser) => ({
-        //   ...prevUser,
-        //   family: newFamily,
-        // }));
         await initializeSession(user);
         setFamilyName("");
       }
