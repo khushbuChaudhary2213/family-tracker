@@ -5,7 +5,7 @@ import createFamily from "../apiFuncs/createFamily";
 // import joinFamily from "../apiFuncs/joinFamily";
 
 export default function OnboardingCrossroads() {
-  const { user, setUser } = useAuth();
+  const { user, initializeSession } = useAuth();
   // Input fields state
   const [familyName, setFamilyName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -13,7 +13,7 @@ export default function OnboardingCrossroads() {
 
   const currentFamily =
     user?.family?.family !== undefined ? user.family.family : user.family;
-  console.log(currentFamily);
+  // console.log(currentFamily);
 
   const familyAdmins = currentFamily?.admins || [];
 
@@ -44,10 +44,11 @@ export default function OnboardingCrossroads() {
         // console.log(res);
         toast.success(`${newFamily.familyName} created successfully!`);
 
-        setUser((prevUser) => ({
-          ...prevUser,
-          family: newFamily,
-        }));
+        // setUser((prevUser) => ({
+        //   ...prevUser,
+        //   family: newFamily,
+        // }));
+        await initializeSession(user);
         setFamilyName("");
       }
     } catch (err) {
@@ -69,95 +70,115 @@ export default function OnboardingCrossroads() {
         </div>
       )}
       {/* ================= SUCCESS LINK DISPLAY CARD ================= */}
-      {currentFamily != null && isCircleAdmin && (
-        <div className="w-full bg-[#1e1e1e]/80 border border-[#b0c6ff]/20 rounded-2xl p-6 backdrop-blur-md space-y-4 shadow-[0_0_25px_rgba(176,198,255,0.05)]">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 bg-[#b0c6ff]/10 text-[#b0c6ff] rounded-lg flex items-center justify-center border border-[#b0c6ff]/20 shrink-0">
-              <span className="material-symbols-outlined">share_reviews</span>
-            </div>
-            <div className="space-y-1">
-              <h4 className="text-sm font-bold text-white uppercase tracking-wider">
-                Invite Your Members
-              </h4>
-              <p className="text-xs text-[#8c90a0] leading-relaxed">
-                Send this secure invitation link to your family members. When
-                they click it, they will automatically join{" "}
-                <strong>{currentFamily.familyName}</strong>.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 items-stretch">
-            <div className="flex-1 bg-[#0c0c0e] border border-white/5 px-4 py-3 rounded-xl flex items-center justify-between gap-4">
-              <span className="text-xs font-mono text-zinc-400 truncate select-all">
-                {getInviteLink(currentFamily.inviteCode)}
-              </span>
-              <span className="text-[10px] font-bold tracking-widest text-[#b0c6ff] uppercase bg-[#b0c6ff]/10 px-2.5 py-1 rounded border border-[#b0c6ff]/20 shrink-0">
-                Active Link
-              </span>
-            </div>
-            <button
-              onClick={() => handleCopyLink(currentFamily.inviteCode)}
-              className="px-6 py-3 bg-[#b0c6ff] hover:bg-[#9cb6ff] text-[#002d6e] rounded-xl font-bold text-xs tracking-wide transition-all active:scale-95 cursor-pointer shrink-0 flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined text-sm">
-                content_copy
-              </span>
-              Copy Link
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Main Grid Wrapper for Side-By-Side Aspect */}
-      {/* CARD ROW 1: CREATE A FAMILY COMPONENT */}
-      {currentFamily == null && (
-        <div className="bg-[#0e0e0e]/60 border border-white/5 rounded-2xl p-8 backdrop-blur-md flex flex-col justify-between space-y-6">
-          <div className="space-y-4">
-            <div className="w-12 h-12 bg-[#b0c6ff]/10 text-[#b0c6ff] rounded-xl flex items-center justify-center border border-[#b0c6ff]/20">
+      <div className="grid grid-cols-2 gap-4 items-stretch">
+        {/* {currentFamily == null && ( */}
+        <div className="flex flex-col w-full justify-between bg-[#1e1e1e]/80 border border-[#b0c6ff]/20 rounded-2xl p-6 backdrop-blur-md shadow-[0_0_25px_rgba(176,198,255,0.05)]">
+          <div className="flex flex-col items-start gap-4">
+            <div className="w-10 h-10 bg-[#b0c6ff]/10 text-[#b0c6ff] rounded-lg flex items-center justify-center border border-[#b0c6ff]/20 shrink-0">
               <span className="material-symbols-outlined">add_moderator</span>
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">
+            <div className="space-y-1">
+              <h4 className="text-lg font-bold text-white uppercase tracking-wider">
                 Create a Family Circle
-              </h3>
-              <p className="text-xs text-[#8c90a0] mt-1 leading-relaxed">
-                Setup an encrypted admin node hub. You will generate a unique
+              </h4>
+              <p className="text-sm text-[#8c90a0] leading-relaxed">
+                Setup an encrypted admin hub. You will generate a unique
                 security access code to distribute to your family network.
               </p>
             </div>
           </div>
 
-          <form onSubmit={handleCreateSubmit} className="space-y-4 pt-2">
+          <form
+            onSubmit={handleCreateSubmit}
+            className="flex flex-col gap-4 items-stretch mt-6"
+          >
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold text-[#8c90a0] uppercase tracking-wider">
+              {/* <label className="text-[10px] font-bold text-[#8c90a0] uppercase tracking-wider pl-1">
                 Circle Name
-              </label>
-              <input
-                type="text"
-                required
-                disabled={loading}
-                placeholder="e.g., The Smith Family"
-                value={familyName}
-                onChange={(e) => setFamilyName(e.target.value)}
-                className="w-full bg-[#1c1c1e] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-[#52525b] focus:outline-none focus:border-[#b0c6ff] disabled:opacity-50 transition-colors"
-              />
+              </label> */}
+              <div className="bg-[#0c0c0e] border border-white/5 rounded-xl transition-all focus-within:border-[#b0c6ff]/30">
+                <input
+                  type="text"
+                  required
+                  disabled={loading}
+                  placeholder="e.g., The Smith Family"
+                  value={familyName}
+                  onChange={(e) => setFamilyName(e.target.value)}
+                  className="w-full py-3 px-4 bg-transparent text-sm text-white placeholder:text-[#52525b] focus:outline-none disabled:opacity-50"
+                />
+              </div>
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-[#b0c6ff] hover:bg-[#9cb6ff] text-[#002d6e] rounded-xl font-bold text-sm tracking-wide transition-all active:scale-[0.99] cursor-pointer disabled:opacity-50 text-center"
+              className="px-6 py-4 bg-[#b0c6ff] hover:bg-[#9cb6ff] text-[#002d6e] rounded-xl font-bold text-xs tracking-wide transition-all active:scale-95 cursor-pointer shrink-0 flex items-center justify-center gap-2"
             >
               {loading ? "Generating Hub..." : "Initialize Circle"}
             </button>
           </form>
         </div>
-      )}
-      {currentFamily != null && !isCircleAdmin && (
-        <div className="bg-[#0e0e0e]/40 border border-white/5 rounded-2xl p-8 text-center text-[#8c90a0] text-sm tracking-wide">
-          Connected to family network mesh as a protected endnode.
-        </div>
-      )}
+
+        {currentFamily != null && isCircleAdmin && (
+          <div className="flex flex-col justify-between w-full bg-[#1e1e1e]/80 border border-[#b0c6ff]/20 rounded-2xl p-6 backdrop-blur-md shadow-[0_0_25px_rgba(176,198,255,0.05)]">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                {/* Icon Box Container */}
+                <div className="w-10 h-10 bg-[#b0c6ff]/10 text-[#b0c6ff] rounded-lg flex items-center justify-center border border-[#b0c6ff]/20 shrink-0">
+                  <span className="material-symbols-outlined">
+                    share_reviews
+                  </span>
+                </div>
+                {/* Typography Label */}
+                <p className="text-md font-semibold text-white tracking-wide">
+                  Family Name :{" "}
+                  <span className="text-[#b0c6ff] font-bold">
+                    {currentFamily.familyName}
+                  </span>
+                </p>
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-lg font-bold text-white uppercase tracking-wider">
+                  Invite Your Members
+                </h4>
+                <p className="text-sm text-[#8c90a0] leading-relaxed">
+                  Send this secure invitation link to your family members. When
+                  they click it, they will automatically join{" "}
+                  <strong>{currentFamily.familyName}</strong>.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4 items-stretch mt-6">
+              <div className=" bg-[#0c0c0e] border border-white/5 px-4 py-3 rounded-xl flex items-center justify-between gap-4">
+                <span className="text-xs font-mono text-zinc-400 truncate select-all">
+                  {getInviteLink(currentFamily.inviteCode)}
+                </span>
+                <span className="text-[10px] font-bold tracking-widest text-[#b0c6ff] uppercase bg-[#b0c6ff]/10 px-2.5 py-1 rounded border border-[#b0c6ff]/20 shrink-0">
+                  Active Link
+                </span>
+              </div>
+              <button
+                onClick={() => handleCopyLink(currentFamily.inviteCode)}
+                className="px-6 py-3 bg-[#b0c6ff] hover:bg-[#9cb6ff] text-[#002d6e] rounded-xl font-bold text-xs tracking-wide transition-all active:scale-95 cursor-pointer shrink-0 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-sm">
+                  content_copy
+                </span>
+                Copy Link
+              </button>
+            </div>
+          </div>
+        )}
+        {currentFamily != null && !isCircleAdmin && (
+          <div className="bg-[#0e0e0e]/40 border border-white/5 rounded-2xl p-8 text-center text-[#babfd4] text-sm tracking-wide">
+            Connected to {currentFamily.familyName} network mesh as a protected
+            endnode.
+          </div>
+        )}
+      </div>
+      {/* )} */}
     </div>
   );
 }
