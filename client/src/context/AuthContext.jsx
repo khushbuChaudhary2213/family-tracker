@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
       // Safely dig out the family node depending on if your api wrapper strips data layers
       const fetchedFamilies =
         familyRes?.data?.families || familyRes?.data || [];
-      console.log(fetchedFamilies);
+      console.log("Fetched Families: ", fetchedFamilies);
 
       const savedActiveId = localStorage.getItem("activeFamilyId");
 

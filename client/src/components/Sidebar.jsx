@@ -17,8 +17,9 @@ function Sidebar() {
   }, []);
 
   const isFamilyAdmin =
-    activeFamily?.admins?.some((admin) => admin._id === user?.familyId) ||
-    false;
+    activeFamily?.admins?.some((admin) => admin._id === user?._id) || false;
+
+  console.log();
 
   return (
     <>

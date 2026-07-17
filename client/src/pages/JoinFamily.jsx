@@ -6,7 +6,7 @@ import joinFamily from "../apiFuncs/joinFamily";
 
 export default function JoinFamily() {
   const { inviteCode } = useParams();
-  const { user, setUser, loading } = useAuth();
+  const { user, initializeSession, loading } = useAuth();
   const navigate = useNavigate();
   const [status, setStatus] = useState("verifying");
 
@@ -30,7 +30,7 @@ export default function JoinFamily() {
         "You are already A Member of this Family! Welcome back! Entering family space...",
       );
       localStorage.removeItem("pendingInvite");
-      navigate("/dashboard/map", { replace: true });
+      navigate("/dashboard", { replace: true });
     };
 
     // Delay evaluation by one frame to prevent React Context batching racing issues
@@ -76,14 +76,10 @@ export default function JoinFamily() {
             res?.data?.joinedFamily || res?.data?.family || res?.family;
           toast.success("Successfully joined the family circle!");
 
-          setUser((prevUser) => ({
-            ...prevUser,
-            familyId: familyData?._id,
-            family: familyData,
-          }));
+          await initializeSession(user);
 
           localStorage.removeItem("pendingInvite");
-          navigate("/dashboard/map", { replace: true });
+          navigate("/dashboard", { replace: true });
         } catch (err) {
           if (!isMounted) return;
 
@@ -128,7 +124,7 @@ export default function JoinFamily() {
       isMounted = false;
       clearTimeout(evaluationTimer);
     };
-  }, [inviteCode, user, userId, familyId, loading, navigate, setUser]);
+  }, [inviteCode, user, userId, familyId, loading, navigate]);
 
   // View States Render Tree
   if (loading || status === "verifying") {

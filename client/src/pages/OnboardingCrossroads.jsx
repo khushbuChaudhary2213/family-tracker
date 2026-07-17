@@ -5,20 +5,17 @@ import createFamily from "../apiFuncs/createFamily";
 // import joinFamily from "../apiFuncs/joinFamily";
 
 export default function OnboardingCrossroads() {
-  const { user, initializeSession } = useAuth();
-  // Input fields state
+  const { user, activeFamily, initializeSession } = useAuth();
   const [familyName, setFamilyName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const currentFamily =
-    user?.family?.family !== undefined ? user.family.family : user.family;
-  // console.log(currentFamily);
+  const currentFamily = activeFamily || null;
 
   const familyAdmins = currentFamily?.admins || [];
 
-  const isCircleAdmin =
-    familyAdmins?.some((admin) => admin._id === user?._id) || false;
+  // const isCircleAdmin =
+  //   familyAdmins?.some((admin) => admin._id === user?._id) || false;
 
   const getInviteLink = (code) => {
     return `${window.location.origin}/join/${code}`;
@@ -68,7 +65,13 @@ export default function OnboardingCrossroads() {
       {/* ================= SUCCESS LINK DISPLAY CARD ================= */}
 
       {/* Main Grid Wrapper for Side-By-Side Aspect */}
-      <div className="grid grid-cols-2 gap-4 items-stretch">
+      <div
+        className={
+          currentFamily
+            ? "grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch"
+            : "max-w-xl mx-auto"
+        }
+      >
         {/* {currentFamily == null && ( */}
         <div className="flex flex-col w-full justify-between bg-[#1e1e1e]/80 border border-[#b0c6ff]/20 rounded-2xl p-6 backdrop-blur-md shadow-[0_0_25px_rgba(176,198,255,0.05)]">
           <div className="flex flex-col items-start gap-4">
