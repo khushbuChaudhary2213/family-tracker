@@ -41,33 +41,30 @@ export default function Auth() {
         localStorage.setItem("token", res.token);
         setError("");
 
-        const updatedUser = await initializeSession(res.data.user);
-
         const pendingInvite = localStorage.getItem("pendingInvite");
 
         if (pendingInvite) {
-          const currentFamilyId =
-            updatedUser?.family?.familyId || updatedUser?.family?._id;
-
-          // For a brand new user, this will hit immediately
-          if (!currentFamilyId) {
+          try {
+            // 💡 Direct join bypasses routing header race conditions completely!
+            await joinFamily(pendingInvite);
             toast.success(
-              "Account created! Connecting you to the family network...",
+              "Account created & joined family circle successfully!",
             );
-            navigate(`/join/${pendingInvite}`, { replace: true });
-            return; // Terminate early so we don't flash the dashboard view
-          } else {
+          } catch (joinErr) {
+            console.error("Direct join failed on signup:", joinErr);
+          } finally {
             localStorage.removeItem("pendingInvite");
           }
+        } else {
+          toast.success("Account created successfully! Welcome to Sentry.");
         }
 
-        toast.success("Account created successfully! Welcome to Sentry.");
+        await initializeSession(res.data.user);
         navigate("/dashboard", { replace: true });
       } else {
         const errorMsg = res?.message || "Signup failed. Please try again.";
         toast.error(errorMsg);
       }
-      toast.success("Account created successfully! Welcome to Sentry.");
     } catch (err) {
       const errMsg =
         err.response?.data?.message || "Signup failed. Please try again.";
@@ -84,29 +81,38 @@ export default function Auth() {
         setError("");
         // console.log(res);
 
-        const updatedUser = await initializeSession(res.data.user);
-
         const pendingInvite = localStorage.getItem("pendingInvite");
 
-        // 2. Check if there is an active invite pending evaluation
         if (pendingInvite) {
-          const currentFamilyId =
-            updatedUser?.family?.familyId || updatedUser?.family?._id;
+          try {
+            await joinFamily(pendingInvite);
 
-          if (!currentFamilyId) {
-            toast.success(
-              "Authentication verified. Redirecting to join network...",
-            );
-            navigate(`/join/${pendingInvite}`, { replace: true });
-            return;
-          } else {
-            // User is already a member of a circle, discard the invite cleanly
+            // Only remove on successful join
             localStorage.removeItem("pendingInvite");
+            toast.success("Successfully joined the family circle!");
+          } catch (joinErr) {
+            // Check if error is because they are already a member
+            const isAlreadyMember =
+              joinErr.response?.status === 400 ||
+              joinErr.response?.data?.message?.includes("already");
+
+            if (isAlreadyMember) {
+              localStorage.removeItem("pendingInvite");
+              toast.success("You are already a member of this family!");
+            } else {
+              toast.error(
+                "Failed to join circle. Redirecting to invite interface...",
+              );
+              await initializeSession(res.data.user);
+              navigate(`/join/${pendingInvite}`, { replace: true });
+              return;
+            }
           }
+        } else {
+          toast.success("Access Granted. Welcome back to the SENTRY!");
         }
 
-        // 3. Fallback standard redirect if no conditional overrides triggered
-        toast.success("Access Granted. Welcome back to the SENTRY!");
+        await initializeSession(res.data.user);
         navigate("/dashboard", { replace: true });
       } else {
         toast.error("Authentication failed.");

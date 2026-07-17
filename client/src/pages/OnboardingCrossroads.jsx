@@ -120,7 +120,7 @@ export default function OnboardingCrossroads() {
           </form>
         </div>
 
-        {currentFamily != null && isCircleAdmin && (
+        {currentFamily != null && (
           <div className="flex flex-col justify-between w-full bg-[#1e1e1e]/80 border border-[#b0c6ff]/20 rounded-2xl p-6 backdrop-blur-md shadow-[0_0_25px_rgba(176,198,255,0.05)]">
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
@@ -171,12 +171,12 @@ export default function OnboardingCrossroads() {
             </div>
           </div>
         )}
-        {currentFamily != null && !isCircleAdmin && (
+        {/* {currentFamily != null && !isCircleAdmin && (
           <div className="bg-[#0e0e0e]/40 border border-white/5 rounded-2xl p-8 text-center text-[#babfd4] text-sm tracking-wide">
             Connected to {currentFamily.familyName} network mesh as a protected
             endnode.
           </div>
-        )}
+        )} */}
       </div>
       {/* )} */}
     </div>
