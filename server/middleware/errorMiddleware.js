@@ -1,15 +1,17 @@
 const errorMiddleware = (err, req, res, next) => {
+  console.error("💥 ERROR:", err);
   err.statusCode = err.statusCode || 500;
   err.message = err.message || "Internal Server Error";
 
   if (err.name === "ValidationError") {
-    message = Object.values(err.errors)
+    err.message = Object.values(err.errors)
       .map((el) => el.message)
       .join(". ");
+    err.statusCode = 400;
   }
 
   if (err.code === 11000) {
-    message = "This phone number is already registered!";
+    err.message = "This phone number is already registered!";
     err.statusCode = 400;
   }
 
