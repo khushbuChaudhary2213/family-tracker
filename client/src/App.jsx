@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import JoinFamily from "./pages/JoinFamily.jsx";
 import Family from "./pages/Family.jsx";
+import Settings from "./pages/Settings.jsx";
 
 export default function App() {
   const location = useLocation();
@@ -125,6 +126,7 @@ export default function App() {
           <Route index element={<OnboardingCrossroads />} />
           <Route path="map" element={<Map />} />
           <Route path="family" element={<Family />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         <Route path="/join/:inviteCode" element={<JoinFamily />} />

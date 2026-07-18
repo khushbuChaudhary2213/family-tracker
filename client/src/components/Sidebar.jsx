@@ -167,13 +167,13 @@ function Sidebar() {
                 <div
                   key={item.key}
                   onClick={() => navigate(item.path)}
-                  className={
+                  className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl cursor-pointer active:opacity-80 transition-all duration-300 ease-in-out group ${
                     active
-                      ? "bg-[#00a572] text-[#00311f] rounded-xl flex items-center justify-between gap-3 px-4 py-3 cursor-pointer active:opacity-80 transition-all shadow-[0_0_12px_rgba(78,222,163,0.2)]"
-                      : "text-[#c2c6d7] hover:text-[#e5e2e1] flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 rounded-xl transition-all duration-200 group"
-                  }
+                      ? "bg-[#00a572] text-[#00311f] shadow-[0_0_12px_rgba(78,222,163,0.2)]"
+                      : "bg-[#00a572]/0 text-[#c2c6d7] hover:text-[#e5e2e1] hover:bg-white/5 shadow-[0_0_12px_rgba(78,222,163,0)]"
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="relative z-10 flex items-center gap-3">
                     <span className="material-symbols-outlined">
                       {item.icon}
                     </span>
@@ -240,7 +240,7 @@ function Sidebar() {
             <div
               key={item.key}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center justify-center gap-0.5 relative cursor-pointer ${
+              className={`flex flex-col items-center justify-center gap-0.5 relative cursor-pointer transition-colors duration-300 ease-out ${
                 active ? "text-[#4edea3]" : "text-[#c2c6d7] active:text-white"
               }`}
             >
