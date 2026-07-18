@@ -1,9 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
+const NAV_ITEMS = [
+  {
+    key: "dashboard",
+    label: "Dashboard",
+    icon: "dashboard",
+    path: "/dashboard",
+  },
+  { key: "family", label: "Family", icon: "group", path: "/dashboard/family" },
+  {
+    key: "settings",
+    label: "Settings",
+    icon: "settings",
+    path: "/dashboard/settings",
+  },
+];
 
 function Sidebar() {
   const { user, families, activeFamily, switchActiveFamily } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -19,7 +37,10 @@ function Sidebar() {
   const isFamilyAdmin =
     activeFamily?.admins?.some((admin) => admin._id === user?._id) || false;
 
-  console.log();
+  const isActivePath = (path) =>
+    path === "/dashboard"
+      ? location.pathname === "/dashboard"
+      : location.pathname.startsWith(path);
 
   return (
     <>
@@ -140,25 +161,33 @@ function Sidebar() {
             </div>
           )}
           <nav className="flex flex-col gap-2 mt-8">
-            <div className="bg-[#00a572] text-[#00311f] rounded-xl flex items-center gap-3 px-4 py-3 cursor-pointer active:opacity-80 transition-all shadow-[0_0_12px_rgba(78,222,163,0.2)]">
-              <span className="material-symbols-outlined">dashboard</span>
-              <span className="text-lg font-medium">Dashboard</span>
-            </div>
-            <div className="text-[#c2c6d7] hover:text-[#e5e2e1] flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 rounded-xl transition-all duration-200 group">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined">group</span>
-                <span className="text-lg font-medium">Family</span>
-              </div>
-              {!activeFamily && (
-                <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                  Empty
-                </span>
-              )}
-            </div>
-            <div className="text-[#c2c6d7] hover:text-[#e5e2e1] flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-white/5 rounded-xl transition-all duration-200">
-              <span className="material-symbols-outlined">settings</span>
-              <span className="text-lg font-medium">Settings</span>
-            </div>
+            {NAV_ITEMS.map((item) => {
+              const active = isActivePath(item.path);
+              return (
+                <div
+                  key={item.key}
+                  onClick={() => navigate(item.path)}
+                  className={
+                    active
+                      ? "bg-[#00a572] text-[#00311f] rounded-xl flex items-center justify-between gap-3 px-4 py-3 cursor-pointer active:opacity-80 transition-all shadow-[0_0_12px_rgba(78,222,163,0.2)]"
+                      : "text-[#c2c6d7] hover:text-[#e5e2e1] flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-white/5 rounded-xl transition-all duration-200 group"
+                  }
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined">
+                      {item.icon}
+                    </span>
+                    <span className="text-lg font-medium">{item.label}</span>
+                  </div>
+
+                  {item.key === "family" && !activeFamily && (
+                    <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                      Empty
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </nav>
 
           {/* Persistent Protection Card Status */}
@@ -174,7 +203,10 @@ function Sidebar() {
                 <p className="text-xs text-[#c2c6d7] mb-4 leading-relaxed">
                   Your location is being shared with the Family Lead.
                 </p>
-                <button className="w-full py-2 bg-[#2a2a2a] hover:bg-[#393939] text-[#e5e2e1] rounded-lg text-xs font-bold transition-colors cursor-pointer">
+                <button
+                  onClick={() => navigate("/dashboard/family")}
+                  className="w-full py-2 bg-[#2a2a2a] hover:bg-[#393939] text-[#e5e2e1] rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                >
                   Privacy Controls
                 </button>
               </>
@@ -189,7 +221,10 @@ function Sidebar() {
                 <p className="text-xs text-[#c2c6d7] mb-4 leading-relaxed">
                   You aren't linked to a family ecosystem.
                 </p>
-                <button className="w-full py-2 bg-[#b0c6ff] hover:bg-[#9cb6f7] text-[#002d6e] rounded-lg text-xs font-bold transition-all active:scale-95 cursor-pointer">
+                <button
+                  onClick={() => navigate("/dashboard")}
+                  className="w-full py-2 bg-[#b0c6ff] hover:bg-[#9cb6f7] text-[#002d6e] rounded-lg text-xs font-bold transition-all active:scale-95 cursor-pointer"
+                >
                   Setup Family Circle
                 </button>
               </>
@@ -199,25 +234,28 @@ function Sidebar() {
       </aside>
 
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#171717]/90 backdrop-blur-xl border-t border-white/5 px-6 flex items-center justify-around z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-        <div className="flex flex-col items-center justify-center gap-0.5 text-[#4edea3] cursor-pointer">
-          <span className="material-symbols-outlined text-xl">dashboard</span>
-          <span className="text-[10px] font-medium tracking-wide">Home</span>
-        </div>
-
-        <div className="flex flex-col items-center justify-center gap-0.5 text-[#c2c6d7] active:text-white relative cursor-pointer">
-          <span className="material-symbols-outlined text-xl">group</span>
-          <span className="text-[10px] font-medium tracking-wide">Family</span>
-          {!activeFamily && (
-            <span className="absolute top-0 right-1 w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-          )}
-        </div>
-
-        <div className="flex flex-col items-center justify-center gap-0.5 text-[#c2c6d7] active:text-white cursor-pointer">
-          <span className="material-symbols-outlined text-xl">settings</span>
-          <span className="text-[10px] font-medium tracking-wide">
-            Settings
-          </span>
-        </div>
+        {NAV_ITEMS.map((item) => {
+          const active = isActivePath(item.path);
+          return (
+            <div
+              key={item.key}
+              onClick={() => navigate(item.path)}
+              className={`flex flex-col items-center justify-center gap-0.5 relative cursor-pointer ${
+                active ? "text-[#4edea3]" : "text-[#c2c6d7] active:text-white"
+              }`}
+            >
+              <span className="material-symbols-outlined text-xl">
+                {item.icon}
+              </span>
+              <span className="text-[10px] font-medium tracking-wide">
+                {item.label}
+              </span>
+              {item.key === "family" && !activeFamily && (
+                <span className="absolute top-0 right-1 w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+              )}
+            </div>
+          );
+        })}
       </nav>
     </>
   );

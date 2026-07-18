@@ -2,7 +2,7 @@ import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Footer from "./components/Footer.jsx";
 import Header from "./components/Header.jsx";
 import Hero from "./components/Hero.jsx";
-import Map from "./components/Map.jsx";
+import Map from "./pages/Map.jsx";
 import DashboardLayout from "./layouts/DashboardLayout.jsx";
 import Auth from "./pages/Auth.jsx";
 import PublicRoute from "./utils/PublicRoute.jsx";
@@ -13,6 +13,7 @@ import OnboardingCrossroads from "./pages/OnboardingCrossroads.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import JoinFamily from "./pages/JoinFamily.jsx";
+import Family from "./pages/Family.jsx";
 
 export default function App() {
   const location = useLocation();
@@ -23,7 +24,6 @@ export default function App() {
 
   const appState = location.pathname.split("/")[1];
   console.log(location.pathname.split("/")[1]);
-  // const [authMode, setAuthMode] = useState("login"); // 'login' or 'signup'
 
   const handleTriggerAuth = (mode) => {
     navigate("/auth", { state: { initialMode: mode } });
@@ -124,6 +124,7 @@ export default function App() {
         >
           <Route index element={<OnboardingCrossroads />} />
           <Route path="map" element={<Map />} />
+          <Route path="family" element={<Family />} />
         </Route>
 
         <Route path="/join/:inviteCode" element={<JoinFamily />} />

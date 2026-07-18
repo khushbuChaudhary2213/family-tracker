@@ -1,7 +1,14 @@
 exports.removeMemberFromFamily = (family, memberId) => {
-  family.members = family.members.filter(
-    (m) => m.user._id.toString() !== memberId,
+  const target = family.members.find(
+    (m) => m.user && m.user._id.toString() === memberId,
   );
+
+  if (target) {
+    family.members.pull({ _id: target._id });
+  }
+
+  // Clean up any orphaned members (user was deleted) while we're here
+  family.members = family.members.filter((m) => m.user);
 };
 
 exports.removeLocationPermission = (family, memberId) => {

@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem("activeFamilyId", familyId);
     }
   };
+
   const initializeSession = async (userData) => {
     try {
       const familyRes = await fetchFamily();

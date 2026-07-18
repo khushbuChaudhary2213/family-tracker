@@ -1,6 +1,6 @@
 const ErrorHandler = require("../utils/ErrorHandler");
 
-exports.getUser = async (req, res) => {
+exports.getUser = async (req, res, next) => {
   try {
     const user = req.user;
 
