@@ -7,7 +7,7 @@ import changePassword from "../apiFuncs/changePassword";
 import deleteAccount from "../apiFuncs/deleteAccount";
 
 export default function Settings() {
-  const { user, setUser, logout } = useAuth();
+  const { user, initializeSession, logout } = useAuth();
   const navigate = useNavigate();
 
   // ---------- Profile section ----------
@@ -21,9 +21,11 @@ export default function Settings() {
     setSavingProfile(true);
     try {
       const res = await updateProfile({ name: name.trim() });
-      const updatedUser = res?.data?.user;
+      console.log(res?.data);
+      const updatedUser = res?.data?.updatedUser;
+      console.log(updatedUser);
       if (updatedUser) {
-        setUser((prev) => ({ ...prev, name: updatedUser.name }));
+        await initializeSession(updatedUser);
       }
       toast.success("Profile updated successfully!");
     } catch (err) {
@@ -73,7 +75,6 @@ export default function Settings() {
   // ---------- Notification toggles (client-only for now) ----------
   const [notifLocation, setNotifLocation] = useState(true);
   const [notifSOS, setNotifSOS] = useState(true);
-  const [notifEmail, setNotifEmail] = useState(false);
 
   // ---------- Danger zone ----------
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

@@ -26,17 +26,58 @@ exports.updateProfile = async (req, res, next) => {
 
     if (!name) return next(new ErrorHandler(400, "Please enter the name!"));
 
-    const updatedUser = User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       user._id,
       { name },
-      { new: true, runValidatiors: true },
+      { returnDocument: "after", runValidators: true },
     );
 
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
       data: {
-        user,
+        updatedUser,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (newPassword != confirmNewPassword)
+      return next(
+        new ErrorHandler("New Password and Confirm New Password doesn't match"),
+      );
+
+    const user = await User.findById(req.user._id).select("+password");
+
+    const isMatch = await user.correctPassword(currentPassword, user.password);
+
+    if (!isMatch)
+      return next(
+        new ErrorHandler(
+          401,
+          "Current Password doesn't match the existing Password",
+        ),
+      );
+
+    user.password = newPassword;
+    user.confirmPassword = confirmNewPassword;
+
+    await user.save();
+
+    user.password = undefined;
+    user.confirmPassword = undefined;
+
+    res.status(201).json({
+      status: true,
+      message: "Password Changed Successfully",
+      data: {
+        updatedUser: user,
       },
     });
   } catch (err) {

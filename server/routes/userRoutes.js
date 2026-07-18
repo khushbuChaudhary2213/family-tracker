@@ -11,6 +11,11 @@ router.post("/login", authController.login);
 
 router.use(authMiddleware.protect);
 
-router.get("/me", userController.getUser).patch(userController.updateProfile);
+router
+  .route("/me")
+  .get(userController.getUser)
+  .patch(userController.updateProfile);
+
+router.patch("/change-password", userController.changePassword);
 
 module.exports = router;
