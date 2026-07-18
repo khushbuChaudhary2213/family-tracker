@@ -14,7 +14,8 @@ router.use(authMiddleware.protect);
 router
   .route("/me")
   .get(userController.getUser)
-  .patch(userController.updateProfile);
+  .patch(userController.updateProfile)
+  .delete(userController.deleteProfile);
 
 router.patch("/change-password", userController.changePassword);
 

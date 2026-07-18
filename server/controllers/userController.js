@@ -1,5 +1,8 @@
 const User = require("../models/userModel");
+const Family = require("../models/familyModel");
 const ErrorHandler = require("../utils/ErrorHandler");
+// const { removeMemberFromFamily } = require("../utils/familyServices");
+const { preventLastAdminLeaving } = require("../middleware/familyMiddleware");
 
 exports.getUser = async (req, res, next) => {
   try {
@@ -80,6 +83,55 @@ exports.changePassword = async (req, res, next) => {
         updatedUser: user,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteProfile = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const userFamilies = await Family.find({ "members.user": userId });
+
+    for (const fam of userFamilies) {
+      let middlewareErr = null;
+
+      const mockReq = {
+        body: { memberId: userId.toString() },
+        family: fam,
+      };
+
+      const mockNext = (err) => {
+        if (err) middlewareErr = err;
+      };
+
+      preventLastAdminLeaving(mockReq, res, mockNext);
+
+      if (middlewareErr) {
+        return next(middlewareErr);
+      }
+    }
+
+    await Family.updateMany(
+      { "members.user": userId },
+      {
+        $pull: {
+          members: { user: userId },
+        },
+      },
+    );
+
+    const deletedUser = await User.findByIdAndDelete(req.user._id);
+    if (!deletedUser) {
+      return next(new ErrorHandler(404, "User not found"));
+    }
+
+    res.status(200).json({
+      status: true,
+      message: "User Deleted Successfully",
+    });
+    // removeMemberFromFamily(req.user);
   } catch (err) {
     next(err);
   }

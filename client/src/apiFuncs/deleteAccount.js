@@ -1,6 +1,5 @@
 import api from "../utils/axios";
 
-// You'll build: DELETE /api/v1/users/me
 const deleteAccount = async () => {
   try {
     const res = await api.delete("/users/me");
