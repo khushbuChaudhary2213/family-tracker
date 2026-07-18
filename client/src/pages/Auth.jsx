@@ -15,6 +15,7 @@ export default function Auth() {
   const incomingMode = location.state?.initialMode || "login";
 
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(incomingMode === "signup");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -29,6 +30,7 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSignUp = async (name, phone, password, confirmPassword) => {
+    setIsLoading(true);
     try {
       const res = await signUpUser({
         name,
@@ -69,10 +71,13 @@ export default function Auth() {
       const errMsg =
         err.response?.data?.message || "Signup failed. Please try again.";
       toast.error(errMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleLogin = async (phone, password) => {
+    setIsLoading(true);
     try {
       const res = await loginUser({ phoneNumber: phone, password });
 
@@ -123,6 +128,8 @@ export default function Auth() {
         err.response?.data?.message ||
         "Invalid credentials or network failure.";
       toast.error(errorMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -399,9 +406,20 @@ export default function Auth() {
               {/* Dynamic Core Submit Execution Action Button */}
               <button
                 type="submit"
-                className="w-full py-4 bg-[#b0c6ff] text-[#002d6e] rounded-xl font-bold text-base shadow-lg shadow-[#b0c6ff]/20 hover:scale-[1.02] active:scale-95 transition-all duration-200 mt-4"
+                className={`w-full py-4 rounded-xl font-bold text-base mt-4 transition-all duration-200
+    ${
+      isLoading
+        ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+        : "bg-[#b0c6ff] text-[#002d6e] shadow-lg shadow-[#b0c6ff]/20 hover:scale-[1.02] active:scale-95"
+    }`}
               >
-                {isSignUp ? "Create Sanctuary" : "Access Vault"}
+                {isLoading
+                  ? isSignUp
+                    ? "Creating Account..."
+                    : "Authenticating..."
+                  : isSignUp
+                    ? "Create Sanctuary"
+                    : "Access Vault"}
               </button>
             </form>
           </div>
