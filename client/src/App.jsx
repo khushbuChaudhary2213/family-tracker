@@ -102,12 +102,12 @@ export default function App() {
                   onAuthSuccess={() => navigate("/dashboard")}
                 />
 
-                <button
+                {/* <button
                   onClick={() => navigate("/dashboard")}
                   className="fixed bottom-4 right-4 bg-[#00a572] text-xs font-bold text-black px-3 py-2 rounded-md opacity-30 hover:opacity-100 z-50 transition-opacity"
                 >
                   Dev Bypass to Dashboard →
-                </button>
+                </button> */}
               </div>
             </PublicRoute>
           }

@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function Header({ activeTab, onTriggerAuth, onSignOut }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -101,7 +103,10 @@ function Header({ activeTab, onTriggerAuth, onSignOut }) {
               {/* Action Buttons */}
               <div className="p-1.5 space-y-0.5">
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    navigate("/dashboard/settings");
+                    setIsOpen(false);
+                  }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-[#c2c6d7] hover:text-white hover:bg-white/5 rounded-lg transition-all text-left group cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-base text-zinc-500 group-hover:text-[#b0c6ff]">

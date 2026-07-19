@@ -114,10 +114,10 @@ function Map() {
       console.log("Socket Error: ", error);
     });
 
-    return () => {
-      navigator.geolocation.clearWatch(location);
-      socket.disconnect();
-    };
+    // return () => {
+    //   navigator.geolocation.clearWatch(location);
+    //   socket.disconnect();
+    // };
   }, [socket]);
 
   if (coords.length === 0) {
