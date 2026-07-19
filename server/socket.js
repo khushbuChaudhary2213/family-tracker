@@ -1,18 +1,33 @@
 // socket.js
 const { Server } = require("socket.io");
+const verifyToken = require("./utils/verifyToken");
 
 let io;
 
 const initSockets = (server) => {
   io = new Server(server, {
     cors: {
-      origin: "*", // Adjust this to match your React frontend URL in production
+      origin: process.env.VITE_FRONTEND_URL, // Adjust this to match your React frontend URL in production
       methods: ["GET", "POST"],
     },
   });
 
+  io.use(async (socket, next) => {
+    const token = socket.handshake.auth.token;
+
+    if (!token)
+      socket.on("disconnect", () => {
+        console.log("Client Disconnected!!");
+      });
+
+    socket.user = await verifyToken(token);
+
+    next();
+  });
+
   io.on("connection", (socket) => {
     console.log(`📡 New client connected to tracking stream: ${socket.id}`);
+    console.log(`User connected: ${socket.user}`);
 
     // 👇 ADD THIS MASTER LOGGER HERE
     socket.onAny((eventName, ...args) => {
@@ -20,45 +35,46 @@ const initSockets = (server) => {
     });
 
     // 1. When a user logs in on the frontend, have them join a room named after their Family ID
-    socket.on("join_family_room", (data) => {
-      // If data is an object extract familyId, otherwise treat it as a string
-      let familyId = typeof data === "object" ? data.familyId : data;
+    // socket.on("join_family_room", (data) => {
+    //   // If data is an object extract familyId, otherwise treat it as a string
+    //   let familyId = typeof data === "object" ? data.familyId : data;
 
-      if (familyId) {
-        // Clean up any literal double or single quotes sent by client tools
-        familyId = familyId.toString().replace(/['"]+/g, "");
+    //   if (familyId) {
+    //     // Clean up any literal double or single quotes sent by client tools
+    //     familyId = familyId.toString().replace(/['"]+/g, "");
 
-        socket.join(familyId);
-        console.log(
-          `👥 Cleaned Room System: Client ${socket.id} joined room [${familyId}]`,
-        );
-      }
-    });
+    //     socket.join(familyId);
+    //     console.log(
+    //       `👥 Cleaned Room System: Client ${socket.id} joined room [${familyId}]`,
+    //     );
+    //   }
+    // });
 
-    // 2. Handle incoming real-time coordinates from a moving device
+    // // 2. Handle incoming real-time coordinates from a moving device
     socket.on("send_live_location", async (data) => {
-      let { userId, familyId, coordinates } = data;
+      console.log("Data received: ", data);
+      //   let { userId, familyId, coordinates } = data;
 
-      if (familyId) {
-        // Clean up this string too just to be perfectly aligned!
-        familyId = familyId.toString().replace(/['"]+/g, "");
+      //   if (familyId) {
+      //     // Clean up this string too just to be perfectly aligned!
+      //     familyId = familyId.toString().replace(/['"]+/g, "");
 
-        try {
-          socket.to(familyId).emit("receive_live_location", {
-            userId,
-            currentLocation: {
-              type: "Point",
-              coordinates: coordinates,
-            },
-            locationUpdatedAt: new Date(),
-          });
-          console.log(
-            `📡 Broadcasted location for user ${userId} to room [${familyId}]`,
-          );
-        } catch (err) {
-          console.error("Error broadcasting live location:", err.message);
-        }
-      }
+      //     try {
+      //       socket.to(familyId).emit("receive_live_location", {
+      //         userId,
+      //         currentLocation: {
+      //           type: "Point",
+      //           coordinates: coordinates,
+      //         },
+      //         locationUpdatedAt: new Date(),
+      //       });
+      //       console.log(
+      //         `📡 Broadcasted location for user ${userId} to room [${familyId}]`,
+      //       );
+      //     } catch (err) {
+      //       console.error("Error broadcasting live location:", err.message);
+      //     }
+      //   }
     });
 
     socket.on("disconnect", () => {

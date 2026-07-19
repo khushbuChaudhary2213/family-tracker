@@ -1,3 +1,7 @@
+const { promisify } = require("util");
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel");
+
 async function verifyToken(token) {
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
@@ -10,4 +14,4 @@ async function verifyToken(token) {
   return user;
 }
 
-export default verifyToken;
+module.exports = verifyToken;

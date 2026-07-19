@@ -16,6 +16,12 @@ const NAV_ITEMS = [
     icon: "settings",
     path: "/dashboard/settings",
   },
+  {
+    key: "map",
+    label: "Map",
+    icon: "map",
+    path: "/dashboard/map",
+  },
 ];
 
 function Sidebar() {

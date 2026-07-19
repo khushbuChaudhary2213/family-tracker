@@ -2,7 +2,7 @@ const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const ErrorHandler = require("../utils/ErrorHandler");
-const { default: verifyToken } = require("../utils/verifyToken");
+const verifyToken = require("../utils/verifyToken");
 
 exports.protect = async (req, res, next) => {
   try {
