@@ -2,6 +2,7 @@ const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const ErrorHandler = require("../utils/ErrorHandler");
+const { default: verifyToken } = require("../utils/verifyToken");
 
 exports.protect = async (req, res, next) => {
   try {
@@ -23,17 +24,19 @@ exports.protect = async (req, res, next) => {
       );
     }
 
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    // const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
-      return next(
-        new ErrorHandler(
-          401,
-          "The user belonging to this token no longer exists!",
-        ),
-      );
-    }
+    // const currentUser = await User.findById(decoded.id);
+    // if (!currentUser) {
+    //   return next(
+    //     new ErrorHandler(
+    //       401,
+    //       "The user belonging to this token no longer exists!",
+    //     ),
+    //   );
+    // }
+
+    const currentUser = await verifyToken(token);
 
     req.user = currentUser;
     console.log(`Logged in user: ${req.user}`);
