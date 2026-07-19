@@ -1,6 +1,7 @@
 // socket.js
 const { Server } = require("socket.io");
 const verifyToken = require("./utils/verifyToken");
+const Family = require("./models/familyModel");
 
 let io;
 
@@ -35,46 +36,45 @@ const initSockets = (server) => {
     });
 
     // 1. When a user logs in on the frontend, have them join a room named after their Family ID
-    // socket.on("join_family_room", (data) => {
-    //   // If data is an object extract familyId, otherwise treat it as a string
-    //   let familyId = typeof data === "object" ? data.familyId : data;
+    socket.on("join_family_room", async (familyId) => {
+      try {
+        const family = await Family.findById(familyId);
 
-    //   if (familyId) {
-    //     // Clean up any literal double or single quotes sent by client tools
-    //     familyId = familyId.toString().replace(/['"]+/g, "");
+        if (!family) return socket.emit("error", "Family not found!");
 
-    //     socket.join(familyId);
-    //     console.log(
-    //       `👥 Cleaned Room System: Client ${socket.id} joined room [${familyId}]`,
-    //     );
-    //   }
-    // });
+        const belongsToFamily = family.members.some(
+          (m) => m.user.toString() === socket.user._id.toString(),
+        );
 
-    // // 2. Handle incoming real-time coordinates from a moving device
+        if (!belongsToFamily) {
+          return socket.emit("error", "You are not a member of this family");
+        }
+
+        socket.join(familyId);
+
+        console.log(`${socket.user.name} joined family room ${familyId}`);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
+    // Handle incoming real-time coordinates from a moving device
     socket.on("send_live_location", async (data) => {
       console.log("Data received: ", data);
-      //   let { userId, familyId, coordinates } = data;
+      let { userId, userName, familyId, coords } = data;
 
-      //   if (familyId) {
-      //     // Clean up this string too just to be perfectly aligned!
-      //     familyId = familyId.toString().replace(/['"]+/g, "");
-
-      //     try {
-      //       socket.to(familyId).emit("receive_live_location", {
-      //         userId,
-      //         currentLocation: {
-      //           type: "Point",
-      //           coordinates: coordinates,
-      //         },
-      //         locationUpdatedAt: new Date(),
-      //       });
-      //       console.log(
-      //         `📡 Broadcasted location for user ${userId} to room [${familyId}]`,
-      //       );
-      //     } catch (err) {
-      //       console.error("Error broadcasting live location:", err.message);
-      //     }
-      //   }
+      try {
+        io.to(familyId).emit("receive_live_location", {
+          userId,
+          userName,
+          currentLocation: coords,
+        });
+        console.log(
+          `📡 Broadcasted location for user ${userId} to room [${familyId}]`,
+        );
+      } catch (err) {
+        console.error("Error broadcasting live location:", err.message);
+      }
     });
 
     socket.on("disconnect", () => {
