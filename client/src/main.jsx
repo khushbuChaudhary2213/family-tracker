@@ -5,14 +5,17 @@ import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import "leaflet/dist/leaflet.css";
+import { LocationProvider } from "./context/LocationContext.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
-      <BrowserRouter>
-        <App />
-        {/* <AppCopy /> */}
-      </BrowserRouter>
+      <LocationProvider>
+        <BrowserRouter>
+          <App />
+          {/* <AppCopy /> */}
+        </BrowserRouter>
+      </LocationProvider>
     </AuthProvider>
   </StrictMode>,
 );

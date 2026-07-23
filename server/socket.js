@@ -127,24 +127,24 @@ const initSockets = (server) => {
       }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       console.log(`❌ Client disconnected from tracking stream: ${socket.id}`);
 
-      try{
-        const updatedPayload = { isOnline: false}
+      try {
+        const updatedPayload = { isOnline: false };
 
-        if(socket.lastKnownCoords){
+        if (socket.lastKnownCoords) {
           updatedPayload.currentLocation = {
-            type:"Point",
+            type: "Point",
             coordinates: [
               Number(socket.lastKnownCoords.lng),
               Number(socket.lastKnownCoords.lat),
-            ]
-          }
-          updatedPayload.locationUpdatedAt = new Date()
+            ],
+          };
+          updatedPayload.locationUpdatedAt = new Date();
         }
 
-        await User.findByIdAndUpdate(userId, { $set: updatedPayload})
+        await User.findByIdAndUpdate(userId, { $set: updatedPayload });
 
         if (socket.familyId) {
           const family = await Family.findById(socket.familyId).populate(
@@ -163,7 +163,7 @@ const initSockets = (server) => {
             });
           }
         }
-      }catch (err) {
+      } catch (err) {
         console.error(
           "Error persisting last known location on disconnect:",
           err.message,
