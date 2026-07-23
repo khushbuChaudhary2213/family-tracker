@@ -69,16 +69,16 @@ exports.getFamilyLocations = async (req, res, next) => {
       .map((m) => {
         const memberId = m.user._id.toString();
         const isSelf = currentUser.user._id.toString() === memberId;
-
         const isAllowed = allowedIds.includes(memberId);
+        const canSee = isSelf || isAllowed;
 
         return {
           _id: m.user._id,
           phoneNumber: m.user.phoneNumber,
           role: m.role,
-          currentLocation: isSelf || isAllowed ? m.user.currentLocation : null,
-          locationUpdatedAt:
-            isSelf || isAllowed ? m.user.locationUpdatedAt : null,
+          isOnline: canSee ? m.user.isOnline : null,
+          currentLocation: canSee ? m.user.currentLocation : null,
+          locationUpdatedAt: canSee ? m.user.locationUpdatedAt : null,
         };
       });
 
