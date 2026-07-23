@@ -11,7 +11,7 @@ exports.updateLocation = async (req, res, next) => {
       return next(
         new ErrorHandler(400, "Latitude or Longitude doesn't exist!"),
       );
-    if (-90 <= lat >= 90 || -180 <= lng >= 180)
+    if (-90 > lat || lat > 90 || -180 > lng || lng > 180)
       return next(new ErrorHandler(400, "Latitude or Longitude is not valid"));
 
     const newLocation = {
@@ -60,7 +60,9 @@ exports.getFamilyLocations = async (req, res, next) => {
       (m) => m.user._id.toString() === req.user._id.toString(),
     );
 
-    const allowedIds = currentUser?.canViewLocationsOf;
+    const allowedIds = (currentUser?.canViewLocationsOf || []).map((id) =>
+      id.toString(),
+    );
 
     const formattedLocations = family.members
       .filter((m) => m.user)
@@ -68,7 +70,7 @@ exports.getFamilyLocations = async (req, res, next) => {
         const memberId = m.user._id.toString();
         const isSelf = currentUser.user._id.toString() === memberId;
 
-        const isAllowed = allowedIds.some((id) => id === memberId);
+        const isAllowed = allowedIds.includes(memberId);
 
         return {
           _id: m.user._id,
