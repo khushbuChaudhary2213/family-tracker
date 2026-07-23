@@ -95,6 +95,7 @@ export function LocationProvider({ children }) {
     try {
       const res = await getFamilyLocations(familyId);
       const locations = res?.data?.locations || [];
+      console.log(locations);
 
       setLocationsByFamily((prev) => {
         const familyMarkers = { ...(prev[familyId] || {}) };
@@ -124,6 +125,25 @@ export function LocationProvider({ children }) {
     }
   };
 
+  const updateMyLocation = (coords) => {
+    if (!activeFamily || !user) return;
+
+    setLocationsByFamily((prev) => ({
+      ...prev,
+      [activeFamily.familyId]: {
+        ...(prev[activeFamily.familyId] || {}),
+        [user._id]: {
+          ...(prev[activeFamily.familyId]?.[user._id] || {}),
+          userName: user.name,
+          lat: coords.lat,
+          lng: coords.lng,
+          isOnline: true,
+          locationUpdatedAt: new Date().toISOString(),
+        },
+      },
+    }));
+  };
+
   const sendLiveLocation = (coords) => {
     if (!socketRef.current || !activeFamily) return;
     socketRef.current.emit("send_live_location", {
@@ -138,7 +158,12 @@ export function LocationProvider({ children }) {
 
   return (
     <LocationContext.Provider
-      value={{ markers, ensureLocationsLoaded, sendLiveLocation }}
+      value={{
+        markers,
+        ensureLocationsLoaded,
+        sendLiveLocation,
+        updateMyLocation,
+      }}
     >
       {children}
     </LocationContext.Provider>
