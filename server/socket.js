@@ -58,6 +58,10 @@ const initSockets = (server) => {
           return socket.emit("error", "You are not a member of this family");
         }
 
+        if (socket.familyId && socket.familyId !== familyId) {
+          socket.leave(socket.familyId);
+        }
+
         socket.join(familyId);
         socket.familyId = familyId;
 

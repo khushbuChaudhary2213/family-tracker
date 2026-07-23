@@ -8,6 +8,9 @@ router.use(authMiddleware.protect);
 
 router.post("/update", locationController.updateLocation);
 
-router.get("/getFamilyLocations", locationController.getFamilyLocations);
+router.get(
+  "/getFamilyLocations/:familyId",
+  locationController.getFamilyLocations,
+);
 
 module.exports = router;

@@ -4,8 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import { useLocationContext } from "../context/LocationContext";
 
 function Map() {
-  const { user, activeFamily } = useAuth();
-  console.log(user);
+  const { activeFamily } = useAuth();
+  // console.log(user);
   const { markers, ensureLocationsLoaded, sendLiveLocation } =
     useLocationContext();
   // const socket = useMemo(
@@ -26,8 +26,10 @@ function Map() {
 
   // 1. Seed the map with last-known/offline positions from the REST snapshot
   useEffect(() => {
-    ensureLocationsLoaded();
-  }, []);
+    if (activeFamily?.familyId) {
+      ensureLocationsLoaded(activeFamily.familyId);
+    }
+  }, [activeFamily?.familyId]);
 
   // 2. Live socket updates
   useEffect(() => {

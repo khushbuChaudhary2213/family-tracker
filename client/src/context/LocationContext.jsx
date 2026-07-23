@@ -7,9 +7,10 @@ const LocationContext = createContext();
 
 export function LocationProvider({ children }) {
   const { user, activeFamily } = useAuth();
-  const [markers, setMarkers] = useState({});
 
-  const hasFetchedRef = useRef(false); // guards the one-time REST fetch
+  const [locationsByFamily, setLocationsByFamily] = useState({});
+
+  const fetchedFamiliesRef = useRef(new Set()); // which familyIds we've already REST-fetched
   const socketRef = useRef(null);
   const joinedFamilyRef = useRef(null);
 
@@ -23,34 +24,41 @@ export function LocationProvider({ children }) {
     socketRef.current = socket;
 
     socket.on("receive_live_location", (data) => {
-      const { userId, userName, currentLocation, isOnline } = data;
-      setMarkers((prev) => ({
+      const { familyId, userId, userName, currentLocation, isOnline } = data;
+      setLocationsByFamily((prev) => ({
         ...prev,
-        [userId]: {
-          userName,
-          lat: currentLocation.lat,
-          lng: currentLocation.lng,
-          isOnline,
-          locationUpdatedAt: new Date().toISOString(),
+        [familyId]: {
+          ...(prev[familyId] || {}),
+          [userId]: {
+            userName,
+            lat: currentLocation.lat,
+            lng: currentLocation.lng,
+            isOnline,
+            locationUpdatedAt: new Date().toISOString(),
+          },
         },
       }));
     });
 
     socket.on("family_member_status", (data) => {
-      const { userId, userName, isOnline, lastKnownLocation } = data;
-      setMarkers((prev) => {
-        const existing = prev[userId];
+      const { familyId, userId, userName, isOnline, lastKnownLocation } = data;
+      setLocationsByFamily((prev) => {
+        const familyMarkers = prev[familyId] || {};
+        const existing = familyMarkers[userId];
         const source = lastKnownLocation || existing;
         if (!source) return prev; // nothing to show yet for this member
 
         return {
           ...prev,
-          [userId]: {
-            userName: userName || existing?.userName,
-            lat: source.lat,
-            lng: source.lng,
-            isOnline,
-            locationUpdatedAt: new Date().toISOString(),
+          [familyId]: {
+            ...familyMarkers,
+            [userId]: {
+              userName: userName || existing?.userName,
+              lat: source.lat,
+              lng: source.lng,
+              isOnline,
+              locationUpdatedAt: new Date().toISOString(),
+            },
           },
         };
       });
@@ -61,9 +69,9 @@ export function LocationProvider({ children }) {
     return () => {
       socket.disconnect();
       socketRef.current = null;
-      hasFetchedRef.current = false;
+      fetchedFamiliesRef.current = new Set();
       joinedFamilyRef.current = null;
-      setMarkers({});
+      setLocationsByFamily({});
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.placeholder ? null : user?._id]); // recreate only on login/logout, not every render
@@ -79,25 +87,27 @@ export function LocationProvider({ children }) {
 
   // Fetches the REST snapshot exactly once per session — safe to call from
   // anywhere, anytime; it's a no-op after the first successful call.
-  const ensureLocationsLoaded = async () => {
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
+  const ensureLocationsLoaded = async (familyId) => {
+    if (!familyId) return;
+    if (fetchedFamiliesRef.current.has(familyId)) return;
+    fetchedFamiliesRef.current.add(familyId);
 
     try {
-      const res = await getFamilyLocations();
+      const res = await getFamilyLocations(familyId);
       const locations = res?.data?.locations || [];
 
-      setMarkers((prev) => {
-        const seeded = { ...prev };
+      setLocationsByFamily((prev) => {
+        const familyMarkers = { ...(prev[familyId] || {}) };
+
         locations.forEach((loc) => {
           if (!loc.currentLocation?.coordinates) return;
           const [lng, lat] = loc.currentLocation.coordinates;
           if (lat === 0 && lng === 0) return; // never-set default coords
 
-          // Don't overwrite a marker that's already been updated live by a socket event
-          if (seeded[loc._id]) return;
+          // Don't clobber a marker already updated live via socket
+          if (familyMarkers[loc._id]) return;
 
-          seeded[loc._id] = {
+          familyMarkers[loc._id] = {
             userName: loc.name,
             lat,
             lng,
@@ -105,11 +115,12 @@ export function LocationProvider({ children }) {
             locationUpdatedAt: loc.locationUpdatedAt,
           };
         });
-        return seeded;
+
+        return { ...prev, [familyId]: familyMarkers };
       });
     } catch (err) {
       console.error("Failed to load family locations:", err);
-      hasFetchedRef.current = false; // allow a retry if it failed
+      fetchedFamiliesRef.current.delete(familyId); // allow a retry if it failed
     }
   };
 
@@ -120,6 +131,10 @@ export function LocationProvider({ children }) {
       coords,
     });
   };
+
+  const markers = activeFamily
+    ? locationsByFamily[activeFamily.familyId] || {}
+    : {};
 
   return (
     <LocationContext.Provider

@@ -47,11 +47,10 @@ exports.updateLocation = async (req, res, next) => {
 
 exports.getFamilyLocations = async (req, res, next) => {
   try {
-    const family = await Family.findOne({
-      "members.user": req.user._id,
-    }).populate(
+    const { familyId } = req.params;
+    const family = await Family.findById(familyId).populate(
       "members.user",
-      "_id phoneNumber currentLocation locationUpdatedAt",
+      "_id phoneNumber currentLocation locationUpdatedAt isOnline",
     );
 
     if (!family) return next(new ErrorHandler(404, "Family not found!"));
@@ -59,6 +58,12 @@ exports.getFamilyLocations = async (req, res, next) => {
     const currentUser = family.members.find(
       (m) => m.user._id.toString() === req.user._id.toString(),
     );
+
+    if (!currentUser) {
+      return next(
+        new ErrorHandler(403, "You are not a member of this family!"),
+      );
+    }
 
     const allowedIds = (currentUser?.canViewLocationsOf || []).map((id) =>
       id.toString(),
@@ -86,6 +91,7 @@ exports.getFamilyLocations = async (req, res, next) => {
       success: true,
       message: "Locations Fetched Successfully!",
       data: {
+        familyId: family._id,
         familyName: family.familyName,
         locations: formattedLocations,
       },
