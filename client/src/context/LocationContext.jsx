@@ -145,9 +145,8 @@ export function LocationProvider({ children }) {
   };
 
   const sendLiveLocation = (coords) => {
-    if (!socketRef.current || !activeFamily) return;
+    if (!socketRef.current) return;
     socketRef.current.emit("send_live_location", {
-      familyId: activeFamily.familyId,
       coords,
     });
   };

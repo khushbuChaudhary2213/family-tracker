@@ -31,6 +31,7 @@ const initSockets = (server) => {
 
   io.on("connection", async (socket) => {
     const userId = socket.user._id.toString();
+
     await User.findByIdAndUpdate(userId, {
       isOnline: true,
     });
@@ -45,12 +46,49 @@ const initSockets = (server) => {
       console.log(`📥 Incoming Event: "${eventName}" | Data received:`, args);
     });
 
-    socket.family = null;
+    // socket.family = null;
     socket.lastKnownCoords = null;
 
+    const loadMyFamilies = async () => {
+      const families = await Family.find({ "members.user": userId }).populate(
+        "members.user",
+        "_id",
+      );
+      socket.families = families;
+      return families;
+    };
+
+    let myFamilies = [];
+    try {
+      myFamilies = await loadMyFamilies();
+    } catch (err) {
+      console.error("Failed to load families on connect:", err.message);
+    }
+
+    // Announce this user as online to every family they belong to, subject
+    // to each family's own canViewLocationsOf permissions.
+    myFamilies.forEach((family) => {
+      const allowedViewerIds = getAllowedViewerIds(family, userId);
+      allowedViewerIds.forEach((viewerId) => {
+        io.to(viewerId).emit("family_member_status", {
+          familyId: family._id.toString(),
+          userId,
+          userName: socket.user.name,
+          isOnline: true,
+        });
+      });
+    });
+
+    //  Kept around for any future family-room-scoped feature (e.g. a family
+    // chat). It no longer gates location broadcasting — a user can belong
+    // to, and broadcast into, several families simultaneously.
     socket.on("join_family_room", async (familyId) => {
       try {
-        const family = await Family.findById(familyId);
+        // const family = await Family.findById(familyId);
+        const family =
+          socket.families?.find((f) => f._id.toString() === familyId) ||
+          (await Family.findById(familyId));
+
         if (!family) return socket.emit("error", "Family not found!");
 
         const belongsToFamily = family.members.some(
@@ -61,23 +99,21 @@ const initSockets = (server) => {
           return socket.emit("error", "You are not a member of this family");
         }
 
-        if (socket.familyId && socket.familyId !== familyId) {
-          socket.leave(socket.familyId);
-        }
+        // if (socket.familyId && socket.familyId !== familyId) {
+        //   socket.leave(socket.familyId);
+        // }
 
         socket.join(familyId);
-        socket.familyId = familyId;
+        // socket.familyId = familyId;
 
-        // await User.findByIdAndUpdate(userId, { isOnline: true });
-
-        const allowedViewerIds = getAllowedViewerIds(family, userId);
-        allowedViewerIds.forEach((viewerId) => {
-          io.to(viewerId).emit("family_member_status", {
-            userId,
-            userName: socket.user.name,
-            isOnline: true,
-          });
-        });
+        // const allowedViewerIds = getAllowedViewerIds(family, userId);
+        // allowedViewerIds.forEach((viewerId) => {
+        //   io.to(viewerId).emit("family_member_status", {
+        //     userId,
+        //     userName: socket.user.name,
+        //     isOnline: true,
+        //   });
+        // });
 
         console.log(`${socket.user.name} joined family room ${familyId}`);
       } catch (err) {
@@ -85,50 +121,42 @@ const initSockets = (server) => {
       }
     });
 
-    // Handle incoming real-time coordinates from a moving device
+    // Real-time coords from a moving device. Fanned out to EVERY family the
+    // sender belongs to, so members see the live position no matter which
+    // family circle they currently have selected on their own screen.
     socket.on("send_live_location", async (data) => {
       try {
         console.log("Data received: ", data);
-        const { familyId, coords } = data;
+        // const { familyId, coords } = data;
+        const { coords } = data || {};
 
-        const userId = socket.user.id.toString();
-        const username = socket.user.name;
+        // const userId = socket.user.id.toString();
+        // const username = socket.user.name;
 
-        if (!familyId || !coords || coords.lat == null || coords.lng == null) {
+        if (!coords || coords.lat == null || coords.lng == null) {
           return;
         }
 
-        const family = await Family.findById(familyId).populate(
-          "members.user",
-          "_id",
-        );
-
-        if (!family) return socket.emit("error", "Family not found!");
-
-        const isMember = family.members.some(
-          (m) => m.user && m.user._id.toString() === userId,
-        );
-
-        if (!isMember) {
-          return socket.emit("error", "You are not a member of this family");
-        }
-
         socket.lastKnownCoords = coords;
-        socket.familyId = familyId;
 
-        const allowedViewerIds = getAllowedViewerIds(family, userId);
-        allowedViewerIds.forEach((viewerId) => {
-          io.to(viewerId).emit("receive_live_location", {
-            userId,
-            userName: socket.user.name,
-            currentLocation: coords,
-            isOnline: true,
+        const families = await loadMyFamilies();
+
+        families.forEach((family) => {
+          const allowedViewerIds = getAllowedViewerIds(family, userId);
+          allowedViewerIds.forEach((viewerId) => {
+            io.to(viewerId).emit("receive_live_location", {
+              familyId: family._id.toString(),
+              userId,
+              userName: socket.user.name,
+              currentLocation: coords,
+              isOnline: true,
+            });
           });
-        });
 
-        console.log(
-          `📡 Broadcasted location for user ${userId} to room [${familyId}]`,
-        );
+          console.log(
+            `📡 Broadcasted location for user ${userId} to room [${family._id.toString()}]`,
+          );
+        });
       } catch (err) {
         console.error("Error broadcasting live location:", err.message);
       }
@@ -153,23 +181,22 @@ const initSockets = (server) => {
 
         await User.findByIdAndUpdate(userId, { $set: updatedPayload });
 
-        if (socket.familyId) {
-          const family = await Family.findById(socket.familyId).populate(
-            "members.user",
-            "_id",
-          );
-          if (family) {
-            const allowedViewerIds = getAllowedViewerIds(family, userId);
-            allowedViewerIds.forEach((viewerId) => {
-              io.to(viewerId).emit("family_member_status", {
-                userId,
-                userName: socket.user.name,
-                isOnline: false,
-                lastKnownLocation: socket.lastKnownCoords || null,
-              });
+        const families = socket.families?.length
+          ? socket.families
+          : await Family.find({ "members.user": userId });
+
+        families.forEach((family) => {
+          const allowedViewerIds = getAllowedViewerIds(family, userId);
+          allowedViewerIds.forEach((viewerId) => {
+            io.to(viewerId).emit("family_member_status", {
+              familyId: family._id.toString(),
+              userId,
+              userName: socket.user.name,
+              isOnline: false,
+              lastKnownLocation: socket.lastKnownCoords || null,
             });
-          }
-        }
+          });
+        });
       } catch (err) {
         console.error(
           "Error persisting last known location on disconnect:",
