@@ -29,8 +29,11 @@ const initSockets = (server) => {
     }
   });
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     const userId = socket.user._id.toString();
+    await User.findByIdAndUpdate(userId, {
+      isOnline: true,
+    });
     console.log(`📡 New client connected to tracking stream: ${socket.id}`);
     console.log(`User connected: ${socket.user}`);
 
@@ -65,7 +68,7 @@ const initSockets = (server) => {
         socket.join(familyId);
         socket.familyId = familyId;
 
-        await User.findByIdAndUpdate(userId, { isOnline: true });
+        // await User.findByIdAndUpdate(userId, { isOnline: true });
 
         const allowedViewerIds = getAllowedViewerIds(family, userId);
         allowedViewerIds.forEach((viewerId) => {

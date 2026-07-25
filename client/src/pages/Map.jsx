@@ -1,12 +1,11 @@
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { useEffect, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, Tooltip } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import MapController from "../components/MapController";
 import { useAuth } from "../context/AuthContext";
 import { useLocationContext } from "../context/LocationContext";
-import FitBounds from "../components/FitBounds";
-import MapController from "../components/MapController";
 
 function Map() {
   const { activeFamily } = useAuth();

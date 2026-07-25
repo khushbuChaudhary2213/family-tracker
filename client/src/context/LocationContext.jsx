@@ -95,7 +95,7 @@ export function LocationProvider({ children }) {
     try {
       const res = await getFamilyLocations(familyId);
       const locations = res?.data?.locations || [];
-      console.log(locations);
+      // console.log(locations);
 
       setLocationsByFamily((prev) => {
         const familyMarkers = { ...(prev[familyId] || {}) };

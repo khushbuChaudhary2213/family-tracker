@@ -50,7 +50,7 @@ exports.getFamilyLocations = async (req, res, next) => {
     const { familyId } = req.params;
     const family = await Family.findById(familyId).populate(
       "members.user",
-      "_id phoneNumber currentLocation locationUpdatedAt isOnline",
+      "_id name phoneNumber currentLocation locationUpdatedAt isOnline",
     );
 
     if (!family) return next(new ErrorHandler(404, "Family not found!"));
@@ -79,6 +79,7 @@ exports.getFamilyLocations = async (req, res, next) => {
 
         return {
           _id: m.user._id,
+          name: m.user.name,
           phoneNumber: m.user.phoneNumber,
           role: m.role,
           isOnline: canSee ? m.user.isOnline : null,
