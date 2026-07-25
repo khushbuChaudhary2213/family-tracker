@@ -250,8 +250,9 @@ export default function Auth() {
 
             {/* Authentication Action Forms Workspace */}
             <form className="space-y-4" onSubmit={handleSubmit}>
+              {/* FOR FUTURE USE */}
               {/* Federated Social Identity Access Buttons */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
                   className="flex items-center justify-center gap-2 bg-[#2a2a2a] py-2.5 rounded-lg hover:bg-[#393939] transition-colors border border-white/5 text-xs font-medium"
@@ -270,16 +271,16 @@ export default function Auth() {
                   </span>
                   Apple
                 </button>
-              </div>
+              </div> */}
 
               {/* Styled Divider Segment */}
-              <div className="relative flex items-center py-2">
+              {/* <div className="relative flex items-center py-2">
                 <div className="flex-grow border-t border-white/10"></div>
                 <span className="flex-shrink mx-4 text-[10px] font-semibold tracking-widest text-[#8c90a0]">
                   OR PHONE
                 </span>
                 <div className="flex-grow border-t border-white/10"></div>
-              </div>
+              </div> */}
 
               {error && (
                 <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold rounded-lg p-3.5 tracking-wide animate-pulse">
