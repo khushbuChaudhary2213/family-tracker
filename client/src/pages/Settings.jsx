@@ -21,9 +21,9 @@ export default function Settings() {
     setSavingProfile(true);
     try {
       const res = await updateProfile({ name: name.trim() });
-      console.log(res?.data);
+      res?.data;
       const updatedUser = res?.data?.updatedUser;
-      console.log(updatedUser);
+      // console.log(updatedUser);
       if (updatedUser) {
         await initializeSession(updatedUser);
       }

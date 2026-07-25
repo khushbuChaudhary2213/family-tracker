@@ -1,14 +1,16 @@
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import L from "leaflet";
 import { useEffect, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, Tooltip } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import MapController from "../components/MapController";
 import { useAuth } from "../context/AuthContext";
 import { useLocationContext } from "../context/LocationContext";
+import { createCustomMarkerIcon } from "../components/CustomMarker";
 
 function Map() {
-  const { activeFamily } = useAuth();
+  const { user, activeFamily } = useAuth();
   const { markers, ensureLocationsLoaded, sendLiveLocation } =
     useLocationContext();
 
@@ -63,45 +65,56 @@ function Map() {
   }, []);
 
   if (coords.length === 0) {
-    return <h2>Fetching your location...</h2>;
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#0e0e0e] text-white">
+        <div className="flex items-center gap-3">
+          <span className="h-3 w-3 animate-ping rounded-full bg-emerald-500"></span>
+          <h2 className="text-sm font-semibold tracking-wider text-zinc-400">
+            LOCATING GPS SIGNAL...
+          </h2>
+        </div>
+      </div>
+    );
   }
 
-  console.log("Markers", markers);
+  // console.log("Markers", markers);
   return (
     <div className="relative top-10 h-full w-full">
       <div className="absolute right-5 top-5 z-[1000] flex flex-col gap-3">
         {/* Me */}
         <button
           onClick={() => goToMe?.()}
-          className="rounded-xl bg-gray-700 px-4 py-3 shadow-lg transition hover:scale-105 hover:bg-gray-100 hover:text-black"
+          className="flex items-center gap-2 rounded-xl bg-[#1e1e1e]/90 px-4 py-2.5 text-xs font-semibold text-zinc-200 border border-white/10 shadow-lg backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10 hover:text-black active:scale-95 cursor-pointer "
         >
-          📍 Me
+          📍 My Positon
         </button>
 
         {/* Family */}
         <button
           onClick={() => fitMap?.()}
-          className="rounded-xl bg-gray-700 px-4 py-3 shadow-lg transition hover:scale-105 hover:bg-gray-100 hover:text-black"
+          className="flex items-center gap-2 rounded-xl bg-[#1e1e1e]/90 px-4 py-2.5 text-xs font-semibold text-zinc-200 border border-white/10 shadow-lg backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10 hover:text-black active:scale-95 cursor-pointer "
         >
-          👨‍👩‍👧 Family
+          👨‍👩‍👧 Fit Circle
         </button>
 
         {/* Live Follow */}
         <button
           onClick={() => setLiveFollow((prev) => !prev)}
-          className={`rounded-xl px-4 py-3 shadow-lg transition hover:scale-105 ${
+          className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold shadow-lg backdrop-blur-md transition-all border cursor-pointer active:scale-95 ${
             liveFollow
-              ? "bg-green-600 text-white-700"
-              : "bg-white text-gray-700"
+              ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+              : "bg-[#1e1e1e]/90 border-white/10 text-zinc-200 hover:bg-white/10 hover:text-black"
           }`}
         >
-          🛰 {liveFollow ? "Following" : "Follow"}
+          <span className={liveFollow ? "animate-pulse" : ""}>🛰</span>{" "}
+          {liveFollow ? "Live Tracking" : "Track Me"}
         </button>
       </div>
       <MapContainer
         center={coords}
         zoom={13}
         style={{ height: "100%", width: "100%" }}
+        className="z-0"
       >
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
@@ -119,25 +132,47 @@ function Map() {
           zoomToBoundsOnClick={true}
         >
           {Object.entries(markers).map(([userId, m]) => {
-            console.log("Rendering marker:", userId, m);
+            const isCurrentUser = user?._id === userId || user?.id === userId;
             return (
-              <Marker key={userId} position={[m.lat, m.lng]}>
-                <Tooltip>{m.userName}</Tooltip>
-                <Popup className="family-popup">
-                  <div className="w-30 py-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {m.userName}
-                    </h3>
+              <Marker
+                key={userId}
+                position={[m.lat, m.lng]}
+                icon={createCustomMarkerIcon(m, isCurrentUser)}
+              >
+                <Tooltip
+                  direction="top"
+                  offset={[0, -45]}
+                  opacity={1}
+                  className="!bg-[#1e1e1e] !border-white/10 !text-white !font-semibold !rounded-lg !px-3 !py-1.5 !shadow-xl"
+                >
+                  {m.userName} {isCurrentUser ? "(You)" : ""}
+                </Tooltip>
+                <Popup className="sentry-custom-popup">
+                  <div className="w-48 bg-[#1e1e1e] p-3 text-white rounded-xl border border-white/10 shadow-2xl">
+                    <div className="flex items-center gap-2.5 border-b border-white/10 pb-2">
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#b0c6ff] text-[11px] font-bold text-[#002d6e]">
+                        {m.userName ? m.userName[0].toUpperCase() : "U"}
+                      </div>
+                      <div className="overflow-hidden">
+                        <h3 className="truncate text-xs font-bold text-white">
+                          {m.userName}
+                        </h3>
+                        <p className="text-[10px] text-zinc-400">
+                          {isCurrentUser ? "Your Device" : "Circle Member"}
+                        </p>
+                      </div>
+                    </div>
 
-                    <div className="mt-2 flex items-center gap-2">
+                    <div className="mt-2.5 flex items-center gap-2">
                       <span
-                        className={`h-2.5 w-2.5 rounded-full ${
-                          m.isOnline ? "bg-green-500" : "bg-gray-400"
+                        className={`h-2 w-2 rounded-full ${
+                          m.isOnline
+                            ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
+                            : "bg-zinc-500"
                         }`}
                       ></span>
-
-                      <span className="text-sm text-gray-600">
-                        {m.isOnline ? "Live Location" : "Last seen: offline"}
+                      <span className="text-[11px] font-medium text-zinc-300">
+                        {m.isOnline ? "Live Signal" : "Last Seen Offline"}
                       </span>
                     </div>
                   </div>

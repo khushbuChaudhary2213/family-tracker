@@ -35,16 +35,16 @@ const initSockets = (server) => {
     await User.findByIdAndUpdate(userId, {
       isOnline: true,
     });
-    console.log(`📡 New client connected to tracking stream: ${socket.id}`);
-    console.log(`User connected: ${socket.user}`);
+    // console.log(`📡 New client connected to tracking stream: ${socket.id}`);
+    // console.log(`User connected: ${socket.user}`);
 
     // Every user joins a room keyed to their own id — this lets us target exactly the set of users permitted to see a given member's location, instead of broadcasting to the whole family room.
     socket.join(userId);
 
     // 👇 ADD THIS MASTER LOGGER HERE
-    socket.onAny((eventName, ...args) => {
-      console.log(`📥 Incoming Event: "${eventName}" | Data received:`, args);
-    });
+    // socket.onAny((eventName, ...args) => {
+    //   console.log(`📥 Incoming Event: "${eventName}" | Data received:`, args);
+    // });
 
     // socket.family = null;
     socket.lastKnownCoords = null;
@@ -115,7 +115,7 @@ const initSockets = (server) => {
         //   });
         // });
 
-        console.log(`${socket.user.name} joined family room ${familyId}`);
+        // console.log(`${socket.user.name} joined family room ${familyId}`);
       } catch (err) {
         console.error(err);
       }
@@ -126,7 +126,7 @@ const initSockets = (server) => {
     // family circle they currently have selected on their own screen.
     socket.on("send_live_location", async (data) => {
       try {
-        console.log("Data received: ", data);
+        // console.log("Data received: ", data);
         // const { familyId, coords } = data;
         const { coords } = data || {};
 
@@ -153,9 +153,9 @@ const initSockets = (server) => {
             });
           });
 
-          console.log(
-            `📡 Broadcasted location for user ${userId} to room [${family._id.toString()}]`,
-          );
+          // console.log(
+          //   `📡 Broadcasted location for user ${userId} to room [${family._id.toString()}]`,
+          // );
         });
       } catch (err) {
         console.error("Error broadcasting live location:", err.message);
@@ -163,7 +163,7 @@ const initSockets = (server) => {
     });
 
     socket.on("disconnect", async () => {
-      console.log(`❌ Client disconnected from tracking stream: ${socket.id}`);
+      // console.log(`❌ Client disconnected from tracking stream: ${socket.id}`);
 
       try {
         const updatedPayload = { isOnline: false };

@@ -24,12 +24,12 @@ export function AuthProvider({ children }) {
   const initializeSession = async (userData) => {
     try {
       const familyRes = await fetchFamily();
-      console.log(familyRes);
+      // console.log(familyRes);
 
       // Safely dig out the family node depending on if your api wrapper strips data layers
       const fetchedFamilies =
         familyRes?.data?.families || familyRes?.data || [];
-      console.log("Fetched Families: ", fetchedFamilies);
+      // console.log("Fetched Families: ", fetchedFamilies);
 
       const savedActiveId = localStorage.getItem("activeFamilyId");
 
@@ -54,7 +54,7 @@ export function AuthProvider({ children }) {
         family: currentActive,
       };
 
-      console.log(unifiedUserState);
+      // console.log(unifiedUserState);
       setUser(unifiedUserState);
       return unifiedUserState;
     } catch (err) {

@@ -75,7 +75,7 @@ function Header({ activeTab, onTriggerAuth, onSignOut }) {
                 {user?.name || "Operator"}
               </span>
               {/* Initials Circle Avatar */}
-              <div className="w-8 h-8 rounded-full bg-[#b0c6ff] text-[#002d6e] flex items-center justify-center font-bold text-sm shadow-[0_0_15px_rgba(176,198,255,0.1)]">
+              <div className="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-sm shadow-[0_0_15px_rgba(176,198,255,0.1)]">
                 {user?.name ? user.name[0].toUpperCase() : "S"}
               </div>
             </div>

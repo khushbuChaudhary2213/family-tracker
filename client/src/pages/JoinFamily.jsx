@@ -58,7 +58,7 @@ export default function JoinFamily() {
       // 5. User Logged In & New User Joining a Family (Network Sync)
       const executeAutoJoin = async () => {
         try {
-          console.log("Dispatching join network request...");
+          // console.log("Dispatching join network request...");
           const res = await joinFamily(inviteCode);
 
           if (

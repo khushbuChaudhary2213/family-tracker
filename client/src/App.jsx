@@ -24,7 +24,7 @@ export default function App() {
   const showHeader = location.pathname != "/auth";
 
   const appState = location.pathname.split("/")[1];
-  console.log(location.pathname.split("/")[1]);
+  // console.log(location.pathname.split("/")[1]);
 
   const handleTriggerAuth = (mode) => {
     navigate("/auth", { state: { initialMode: mode } });
