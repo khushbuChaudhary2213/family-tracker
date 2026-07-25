@@ -172,13 +172,14 @@ export default function Family() {
             return (
               <div
                 key={member._id}
-                className="flex items-center justify-between gap-4 p-3.5 rounded-xl bg-[#0e0e0e]/50 border border-white/5"
+                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 sm:justify-between p-3.5 rounded-xl bg-[#0e0e0e]/50 border border-white/5"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-full bg-[#b0c6ff] text-[#002d6e] flex items-center justify-center font-bold text-sm shrink-0">
                     {member.name ? member.name[0].toUpperCase() : "S"}
                   </div>
-                  <div className="min-w-0">
+
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-[#e5e2e1] text-sm truncate">
                         {member.name}
@@ -265,7 +266,7 @@ export default function Family() {
       {/* ================= REMOVE / LEAVE CONFIRM MODAL ================= */}
       {confirmTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
-          <div className="w-full max-w-sm bg-[#1e1e1e] border border-white/10 rounded-2xl p-6 space-y-4">
+          <div className="w-full max-w-sm bg-[#1e1e1e] border border-white/10 rounded-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center gap-3">
               <span
                 className={`material-symbols-outlined text-2xl ${

@@ -37,16 +37,16 @@ function Header({ activeTab, onTriggerAuth, onSignOut }) {
       </div>
 
       {activeTab === "" && (
-        <nav className="flex items-center gap-6">
+        <nav className="flex items-center gap-3 sm:gap-6">
           <button
             onClick={() => onTriggerAuth("login")}
-            className="text-sm font-medium text-[#c2c6d7] hover:text-white transition-colors cursor-pointer"
+            className="text-xs sm:text-sm font-medium text-[#c2c6d7] hover:text-white transition-colors cursor-pointer"
           >
             Sign In
           </button>
           <button
             onClick={() => onTriggerAuth("signup")}
-            className="text-sm font-bold bg-white/5 border border-white/10 hover:bg-white/10 px-5 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer"
+            className="text-xs sm:text-sm font-bold bg-white/5 border border-white/10 hover:bg-white/10 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer"
           >
             Create Circle
           </button>

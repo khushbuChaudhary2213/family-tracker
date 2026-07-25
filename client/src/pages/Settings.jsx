@@ -292,12 +292,12 @@ export default function Settings() {
       </div>
 
       {/* ================= DANGER ZONE ================= */}
-      <div className="bg-[#1e1e1e]/80 border border-red-500/20 rounded-2xl p-6 backdrop-blur-md space-y-4">
+      <div className="bg-[#1e1e1e]/80 border border-white/10 rounded-2xl p-6 backdrop-blur-md space-y-5">
         <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider">
           Danger Zone
         </h3>
 
-        <div className="flex items-center justify-between gap-4 p-4 rounded-xl bg-[#0e0e0e]/40 border border-white/5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-4 rounded-xl bg-[#0e0e0e]/40 border border-white/5">
           <div>
             <p className="text-sm font-semibold text-[#e5e2e1]">Sign Out</p>
             <p className="text-xs text-[#8c90a0]">
@@ -309,7 +309,7 @@ export default function Settings() {
               logout();
               navigate("/", { replace: true });
             }}
-            className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0"
+            className="px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 w-full sm:w-auto"
           >
             Disconnect
           </button>

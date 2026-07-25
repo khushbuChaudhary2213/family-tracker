@@ -27,13 +27,21 @@ const NAV_ITEMS = [
 function Sidebar() {
   const { user, families, activeFamily, switchActiveFamily } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  const mobileDropdownRef = useRef(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
+      }
+      if (
+        mobileDropdownRef.current &&
+        !mobileDropdownRef.current.contains(event.target)
+      ) {
+        setMobileDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -238,6 +246,107 @@ function Sidebar() {
           </div>
         </div>
       </aside>
+
+      {/* ================= MOBILE TOP BAR: Role + Active Family Switcher =================
+          Sits directly under the fixed Header, carries the same role/family
+          info the desktop sidebar shows, since that's hidden below lg. */}
+      <div className="lg:hidden fixed top-16 left-0 right-0 h-16 z-40 bg-[#171717]/95 backdrop-blur-xl border-b border-white/5 px-4 flex items-center justify-between gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-sm font-black text-[#b0c6ff] tracking-tight shrink-0">
+            {activeFamily ? (isFamilyAdmin ? "Admin" : "Member") : "Solo"}
+          </span>
+          <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+          <span className="text-xs font-medium text-[#c2c6d7]/70 truncate">
+            {user?.name || "Sentry User"}
+          </span>
+        </div>
+
+        {families.length > 0 ? (
+          <div className="relative shrink-0" ref={mobileDropdownRef}>
+            <button
+              onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+              className={`flex items-center gap-1.5 bg-[#1a1a1c] border hover:border-white/15 active:scale-95 pl-2.5 pr-2 py-2 rounded-lg text-xs text-[#e5e2e1] transition-all cursor-pointer max-w-[160px] ${
+                mobileDropdownOpen ? "border-[#b0c6ff]/40" : "border-white/5"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[#b0c6ff] text-[16px] shrink-0">
+                diversity_1
+              </span>
+              <span className="truncate font-semibold">
+                {activeFamily?.familyName || "Select"}
+              </span>
+              <span
+                className={`material-symbols-outlined text-[#8c90a0] text-base transition-transform duration-300 shrink-0 ${
+                  mobileDropdownOpen ? "rotate-180 text-white" : ""
+                }`}
+              >
+                expand_more
+              </span>
+            </button>
+
+            {mobileDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-64 bg-[#17171a]/95 border border-white/10 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl z-50 overflow-hidden max-h-72 flex flex-col p-1.5 animate-[fadeIn_0.15s_ease-out]">
+                <div className="text-[9px] font-bold text-[#5c5f6c] uppercase tracking-widest px-3 py-1.5 border-b border-white/5 mb-1">
+                  Switch Workspace
+                </div>
+
+                <div className="overflow-y-auto max-h-56 pr-1 space-y-1">
+                  {families.map((fam) => {
+                    const isActive = activeFamily?.familyId === fam.familyId;
+                    return (
+                      <div
+                        key={fam.familyId}
+                        onClick={() => {
+                          switchActiveFamily(fam.familyId);
+                          setMobileDropdownOpen(false);
+                        }}
+                        className={`px-3 py-2.5 rounded-xl text-sm cursor-pointer transition-all duration-150 flex items-center justify-between group/item ${
+                          isActive
+                            ? "text-[#4edea3] bg-[#4edea3]/5 font-semibold"
+                            : "text-[#c2c6d7] hover:bg-white/5 hover:text-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 truncate">
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                              isActive
+                                ? "bg-[#4edea3] shadow-[0_0_8px_#4edea3]"
+                                : "bg-transparent group-hover/item:bg-white/30"
+                            }`}
+                          />
+                          <span className="truncate text-[13px]">
+                            {fam.familyName}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center shrink-0 gap-2">
+                          <span className="text-[10px] text-[#8c90a0] bg-[#1e1e21] border border-white/5 px-2 py-0.5 rounded-md font-medium">
+                            👤 {fam.members?.length || 1}
+                          </span>
+                          {isActive && (
+                            <span className="material-symbols-outlined text-[16px] text-[#4edea3]">
+                              check_circle
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#231a1a] border border-amber-500/10 shrink-0">
+            <span className="material-symbols-outlined text-amber-500 text-sm">
+              warning
+            </span>
+            <span className="text-[10px] font-bold text-amber-400/90 uppercase tracking-wide">
+              No Circle
+            </span>
+          </div>
+        )}
+      </div>
 
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#171717]/90 backdrop-blur-xl border-t border-white/5 px-6 flex items-center justify-around z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
         {NAV_ITEMS.map((item) => {
