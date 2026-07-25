@@ -343,3 +343,47 @@ exports.updateMemberPermissions = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.makeAdmin = async (req, res, next) => {
+  try {
+    const family = req.family;
+    const { targetMemberId } = req.body;
+
+    const targetMember = family.members.find(
+      (m) => m.user._id.toString() === targetMemberId,
+    );
+
+    if (!targetMember) {
+      return res.status(404).json({
+        success: false,
+        message: "Target member not found in this family circle.",
+      });
+    }
+
+    targetMember.role = "admin";
+
+    const otherMembers = family.members.filter(
+      (m) => m.user._id.toString() !== targetMemberId.toString(),
+    );
+
+    otherMembers.forEach((m) => {
+      const memberUserId = m.user._id.toString();
+
+      const alreadyHasPermission = targetMember.canViewLocationsOf.some(
+        (existingId) => existingId.toString() === memberUserId,
+      );
+      if (!alreadyHasPermission) {
+        targetMember.canViewLocationsOf.push(m.user._id);
+      }
+    });
+
+    await family.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Admin promoted Successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};

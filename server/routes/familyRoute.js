@@ -38,4 +38,12 @@ router.patch(
   familyController.updateMemberPermissions,
 );
 
+router.patch(
+  "/:familyId/makeAdmin",
+  familyMiddleware.loadFamily,
+  familyMiddleware.isFamilyAdmin,
+  familyMiddleware.isFamilyMember,
+  familyController.makeAdmin,
+);
+
 module.exports = router;

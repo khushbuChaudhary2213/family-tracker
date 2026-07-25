@@ -55,7 +55,6 @@ export default function Family() {
       name: member.name,
       action: isSelf ? "leave" : "remove",
     });
-    console.log(confirmTarget);
   };
 
   const handleConfirmedAction = async () => {

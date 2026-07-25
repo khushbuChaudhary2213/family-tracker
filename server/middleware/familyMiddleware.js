@@ -7,7 +7,7 @@ exports.loadFamily = async (req, res, next) => {
 
     const family = await Family.findById(familyId).populate(
       "members.user",
-      "_id phoneNumber",
+      "_id phoneNumber name",
     );
     // console.log(family);
 
