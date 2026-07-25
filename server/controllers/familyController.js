@@ -184,7 +184,7 @@ exports.getFamilyInfo = async (req, res, next) => {
           _id: m.user._id,
           name: m.user.name || "Sentry User",
           phoneNumber: m.user.phoneNumber,
-          canViewLocationsOf: (m.user.canViewLocationsOf || []).map((id) =>
+          canViewLocationsOf: (m.canViewLocationsOf || []).map((id) =>
             id.toString(),
           ),
         }));

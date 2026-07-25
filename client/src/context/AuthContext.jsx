@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
   const initializeSession = async (userData) => {
     try {
       const familyRes = await fetchFamily();
-      // console.log(familyRes);
+      console.log(familyRes);
 
       // Safely dig out the family node depending on if your api wrapper strips data layers
       const fetchedFamilies =
