@@ -387,3 +387,33 @@ exports.makeAdmin = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.revokeAdmin = async (req, res, next) => {
+  try {
+    const family = req.family;
+    const { targetMemberId } = req.body;
+
+    const targetMember = family.members.find(
+      (m) => m.user._id.toString() === targetMemberId,
+    );
+
+    if (!targetMember) {
+      return res.status(404).json({
+        success: false,
+        message: "Target member not found in this family circle.",
+      });
+    }
+
+    targetMember.role = "member";
+    targetMember.canViewLocationsOf = [];
+
+    await family.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Admin rights revoked successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -45,5 +45,13 @@ router.patch(
   familyMiddleware.isFamilyMember,
   familyController.makeAdmin,
 );
+router.patch(
+  "/:familyId/revokeAdmin",
+  familyMiddleware.loadFamily,
+  familyMiddleware.isFamilyAdmin,
+  familyMiddleware.isFamilyMember,
+  familyMiddleware.preventLastAdminLeaving,
+  familyController.revokeAdmin,
+);
 
 module.exports = router;

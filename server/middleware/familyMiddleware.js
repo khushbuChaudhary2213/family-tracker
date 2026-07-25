@@ -58,7 +58,7 @@ exports.isSelfAction = (req, res, next) => {
 };
 
 exports.preventLastAdminLeaving = (req, res, next) => {
-  const { memberId } = req.body;
+  const memberId = req.body.memberId || req.body.targetMemberId;
   const family = req.family;
 
   const targetMember = family.members.find(
