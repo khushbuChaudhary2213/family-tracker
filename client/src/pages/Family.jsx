@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import removeMember from "../apiFuncs/removeMember";
 import leaveFamilyApi from "../apiFuncs/leaveFamily";
 import updateMemberPermissions from "../apiFuncs/updateMemberPermissions";
+import { makeAdmin, revokeAdmin } from "../apiFuncs/toggleAdminRole";
 
 export default function Family() {
   const { user, activeFamily, initializeSession } = useAuth();
@@ -47,13 +48,18 @@ export default function Family() {
   };
 
   // ================= REMOVE / LEAVE =================
-  const openConfirm = (member) => {
+  const openConfirm = (member, actionOverride = null) => {
     const isSelf = member._id === user?._id;
+    let action = actionOverride;
+
+    if (!action) {
+      action = isSelf ? "leave" : "remove";
+    }
     // console.log(isSelf);
     setConfirmTarget({
       id: member._id,
       name: member.name,
-      action: isSelf ? "leave" : "remove",
+      action: action,
     });
   };
 
@@ -64,9 +70,15 @@ export default function Family() {
       if (confirmTarget.action === "leave") {
         await leaveFamilyApi(activeFamily.familyId, confirmTarget.id);
         toast.success("You left the family circle.");
-      } else {
+      } else if (confirmTarget.action === "remove") {
         await removeMember(activeFamily.familyId, confirmTarget.id);
         toast.success(`${confirmTarget.name} was removed from the circle.`);
+      } else if (confirmTarget.action === "makeAdmin") {
+        await makeAdmin(activeFamily.familyId, confirmTarget.id);
+        toast.success(`${confirmTarget.name} is now an admin!`);
+      } else if (confirmTarget.action === "revokeAdmin") {
+        await revokeAdmin(activeFamily.familyId, confirmTarget.id);
+        toast.success(`Admin rights revoked for ${confirmTarget.name}.`);
       }
       await refresh();
     } catch (err) {
@@ -194,7 +206,7 @@ export default function Family() {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  {isCurrentUserAdmin && !isSelf && (
+                  {isCurrentUserAdmin && !isSelf && !isMemberAdmin && (
                     <button
                       onClick={() => openAccessModal(member)}
                       title="Manage location access"
@@ -202,6 +214,32 @@ export default function Family() {
                     >
                       <span className="material-symbols-outlined text-lg">
                         visibility
+                      </span>
+                    </button>
+                  )}
+
+                  {/* Promote or Demote Admin Toggle */}
+                  {isCurrentUserAdmin && !isSelf && (
+                    <button
+                      onClick={() =>
+                        openConfirm(
+                          member,
+                          isMemberAdmin ? "revokeAdmin" : "makeAdmin",
+                        )
+                      }
+                      title={
+                        isMemberAdmin ? "Demote to Member" : "Promote to Admin"
+                      }
+                      className={`w-9 h-9 flex items-center justify-center border rounded-lg transition-colors cursor-pointer ${
+                        isMemberAdmin
+                          ? "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/20 text-amber-400"
+                          : "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/20 text-emerald-400"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-lg">
+                        {isMemberAdmin
+                          ? "shield_person"
+                          : "admin_panel_settings"}
                       </span>
                     </button>
                   )}
@@ -229,19 +267,37 @@ export default function Family() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
           <div className="w-full max-w-sm bg-[#1e1e1e] border border-white/10 rounded-2xl p-6 space-y-4">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-red-400 text-2xl">
-                warning
+              <span
+                className={`material-symbols-outlined text-2xl ${
+                  confirmTarget.action === "makeAdmin"
+                    ? "text-emerald-400"
+                    : confirmTarget.action === "revokeAdmin"
+                      ? "text-amber-400"
+                      : "text-red-400"
+                }`}
+              >
+                {confirmTarget.action === "makeAdmin"
+                  ? "admin_panel_settings"
+                  : confirmTarget.action === "revokeAdmin"
+                    ? "shield_person"
+                    : "warning"}
               </span>
               <h4 className="text-lg font-bold text-white">
-                {confirmTarget.action === "leave"
-                  ? "Leave Family Circle?"
-                  : "Remove Member?"}
+                {confirmTarget.action === "leave" && "Leave Family Circle?"}
+                {confirmTarget.action === "remove" && "Remove Member?"}
+                {confirmTarget.action === "makeAdmin" && "Promote to Admin?"}
+                {confirmTarget.action === "revokeAdmin" && "Demote Admin?"}
               </h4>
             </div>
             <p className="text-sm text-[#8c90a0]">
-              {confirmTarget.action === "leave"
-                ? "You will lose access to this circle's shared locations and permissions. This can't be undone."
-                : `${confirmTarget.name} will be removed from the circle and lose all location access. This can't be undone.`}
+              {confirmTarget.action === "leave" &&
+                "You will lose access to this circle's shared locations and permissions. This can't be undone."}
+              {confirmTarget.action === "remove" &&
+                `${confirmTarget.name} will be removed from the circle and lose all location access. This can't be undone.`}
+              {confirmTarget.action === "makeAdmin" &&
+                `This will give ${confirmTarget.name} administrative rights to manage members and location permissions.`}
+              {confirmTarget.action === "revokeAdmin" &&
+                `This will remove administrative rights from ${confirmTarget.name}. They will remain a regular circle member.`}
             </p>
             <div className="flex gap-3 pt-2">
               <button
@@ -254,7 +310,13 @@ export default function Family() {
               <button
                 onClick={handleConfirmedAction}
                 disabled={busy}
-                className="flex-1 py-2.5 bg-red-500/90 hover:bg-red-500 text-white rounded-xl text-sm font-semibold transition-all cursor-pointer disabled:opacity-50"
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer disabled:opacity-50 text-white ${
+                  confirmTarget.action === "makeAdmin"
+                    ? "bg-emerald-600 hover:bg-emerald-500"
+                    : confirmTarget.action === "revokeAdmin"
+                      ? "bg-amber-600 hover:bg-amber-500"
+                      : "bg-red-500/90 hover:bg-red-500"
+                }`}
               >
                 {busy ? "Working..." : "Confirm"}
               </button>
