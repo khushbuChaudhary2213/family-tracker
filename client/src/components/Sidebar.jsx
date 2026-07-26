@@ -11,16 +11,16 @@ const NAV_ITEMS = [
   },
   { key: "family", label: "Family", icon: "group", path: "/dashboard/family" },
   {
-    key: "settings",
-    label: "Settings",
-    icon: "settings",
-    path: "/dashboard/settings",
-  },
-  {
     key: "map",
     label: "Map",
     icon: "map",
     path: "/dashboard/map",
+  },
+  {
+    key: "settings",
+    label: "Settings",
+    icon: "settings",
+    path: "/dashboard/settings",
   },
 ];
 
@@ -174,7 +174,7 @@ function Sidebar() {
               </div>
             </div>
           )}
-          <nav className="flex flex-col gap-2 mt-8">
+          <nav className="flex flex-col gap-2 mt-2">
             {NAV_ITEMS.map((item) => {
               const active = isActivePath(item.path);
               return (

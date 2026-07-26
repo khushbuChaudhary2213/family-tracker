@@ -98,17 +98,14 @@ export default function Settings() {
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6 animate-fade-in py-4">
-      {/* <div>
-        <p className="text-[10px] font-bold tracking-widest text-[#8c90a0] uppercase mb-1">
-          Account
-        </p>
-        <h2 className="text-2xl font-black text-white tracking-tight">
-          Settings
+      <div>
+        <h2 className="uppercase text-4xl font-black text-[#b6bbd0] tracking-tight">
+          Account Settings
         </h2>
-      </div> */}
+      </div>
 
       {/* ================= PROFILE CARD ================= */}
-      <div className="mt-20 bg-[#1e1e1e]/80 border border-white/10 rounded-2xl p-6 backdrop-blur-md space-y-5">
+      <div className=" bg-[#1e1e1e]/80 border border-white/10 rounded-2xl p-6 backdrop-blur-md space-y-5">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-[#b0c6ff] text-[#002d6e] flex items-center justify-center font-bold text-xl shrink-0">
             {user?.name ? user.name[0].toUpperCase() : "S"}
