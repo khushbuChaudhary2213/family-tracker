@@ -1,6 +1,5 @@
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import L from "leaflet";
 import { useEffect, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, Tooltip } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
@@ -24,37 +23,44 @@ function Map() {
   const [goToMe, setGoToMe] = useState(null);
   const [liveFollow, setLiveFollow] = useState(false);
 
+  // Load locations when active family changes
   useEffect(() => {
     if (activeFamily?.familyId) {
       ensureLocationsLoaded(activeFamily.familyId);
     }
   }, [activeFamily?.familyId]);
 
+  // Start continuous GPS tracking
   useEffect(() => {
-    const watchId = navigator.geolocation?.watchPosition(
+    if (!navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         setCoords([latitude, longitude]);
 
-        if (liveFollow) {
-          goToMe?.();
-        }
-
         const now = Date.now();
-
         if (!lastSentCoords.current || now - lastSentTime.current >= 5000) {
           sendLiveLocation({ lat: latitude, lng: longitude });
           lastSentCoords.current = { lat: latitude, lng: longitude };
           lastSentTime.current = now;
         }
       },
-      (error) => console.log("Error in fetching location:", error),
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
+      (error) => console.error("Error fetching location:", error),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
+
     return () => {
       if (watchId != null) navigator.geolocation.clearWatch(watchId);
     };
   }, []);
+
+  // Reactive Live Tracking Effect: Follow position changes dynamically
+  useEffect(() => {
+    if (liveFollow && coords.length === 2 && goToMe) {
+      goToMe();
+    }
+  }, [coords, liveFollow, goToMe]);
 
   if (coords.length === 0) {
     return (
@@ -69,11 +75,7 @@ function Map() {
     );
   }
 
-  // Always guarantee a marker for yourself, even with no family circle or
-  // before the first socket round-trip lands. If you're already in
-  // `markers` (live-updated via the family socket feed), that takes
-  // precedence; otherwise fall back to the local GPS watch.
-  const selfId = user?._id;
+  const selfId = user?._id || user?.id;
   const displayMarkers = {
     ...markers,
     ...(selfId
@@ -91,7 +93,7 @@ function Map() {
 
   return (
     <div className="relative h-full w-full">
-      {/* ================= SOLO MODE INDICATOR ================= */}
+      {/* SOLO MODE INDICATOR */}
       {!activeFamily && (
         <div className="absolute left-3 sm:left-5 top-3 sm:top-5 z-[1000] flex items-center gap-2 sm:gap-3 rounded-xl bg-[#1e1e1e]/90 backdrop-blur-md border border-amber-500/20 pl-3 pr-2 sm:pl-4 sm:pr-2.5 py-2 sm:py-2.5 shadow-lg max-w-[calc(100vw-5.5rem)] sm:max-w-none">
           <div className="flex items-center gap-2 min-w-0">
@@ -109,31 +111,39 @@ function Map() {
         </div>
       )}
 
+      {/* FLOATING ACTION BUTTONS */}
       <div className="absolute right-3 sm:right-5 top-3 sm:top-5 z-[1000] flex flex-col gap-2 sm:gap-3">
+        {/* My Position */}
         <button
-          onClick={() => goToMe?.()}
-          className="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-[#1e1e1e]/90 px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-zinc-200 border border-white/10 shadow-lg backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10 hover:text-black active:scale-95 cursor-pointer"
+          onClick={() => {
+            setLiveFollow(false);
+            goToMe?.();
+          }}
+          className="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-[#1e1e1e]/90 px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-zinc-200 border border-white/10 shadow-lg backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
         >
           📍 <span className="hidden sm:inline">My Position</span>
         </button>
 
-        {/* Family — only meaningful with an active circle */}
+        {/* Fit Circle */}
         {activeFamily && (
           <button
-            onClick={() => fitMap?.()}
-            className="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-[#1e1e1e]/90 px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-zinc-200 border border-white/10 shadow-lg backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10 hover:text-black active:scale-95 cursor-pointer"
+            onClick={() => {
+              setLiveFollow(false);
+              fitMap?.();
+            }}
+            className="flex items-center gap-1.5 sm:gap-2 rounded-xl bg-[#1e1e1e]/90 px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-zinc-200 border border-white/10 shadow-lg backdrop-blur-md transition-all hover:border-white/20 hover:bg-white/10 hover:text-white active:scale-95 cursor-pointer"
           >
             👨‍👩‍👧 <span className="hidden sm:inline">Fit Circle</span>
           </button>
         )}
 
-        {/* Live Follow */}
+        {/* Live Follow Toggle */}
         <button
           onClick={() => setLiveFollow((prev) => !prev)}
           className={`flex items-center gap-1.5 sm:gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold shadow-lg backdrop-blur-md transition-all border cursor-pointer active:scale-95 ${
             liveFollow
               ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
-              : "bg-[#1e1e1e]/90 border-white/10 text-zinc-200 hover:bg-white/10 hover:text-black"
+              : "bg-[#1e1e1e]/90 border-white/10 text-zinc-200 hover:bg-white/10 hover:text-white"
           }`}
         >
           <span className={liveFollow ? "animate-pulse" : ""}>🛰</span>
@@ -143,6 +153,7 @@ function Map() {
         </button>
       </div>
 
+      {/* MAP CONTAINER */}
       <MapContainer
         center={coords}
         zoom={13}
@@ -150,7 +161,7 @@ function Map() {
         className="z-0"
       >
         <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <MapController
