@@ -55,6 +55,7 @@ export default function Family() {
     if (!action) {
       action = isSelf ? "leave" : "remove";
     }
+
     // console.log(isSelf);
     setConfirmTarget({
       id: member._id,

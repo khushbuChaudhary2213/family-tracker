@@ -1,7 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../context/AuthContext";
-import ErrorBoundary from "../components/ErrorBoundary";
+// import ErrorBoundary from "../components/ErrorBoundary";
 
 function DashboardLayout() {
   const { user } = useAuth();
