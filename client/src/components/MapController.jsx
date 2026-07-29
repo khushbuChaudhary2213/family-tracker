@@ -1,16 +1,24 @@
 // MapController.jsx
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 
 function MapController({ markers, coords, setFitMap, setGoToMe }) {
   const map = useMap();
+  const markersRef = useRef(markers);
+  const coordsRef = useRef(coords);
+
+  useEffect(() => {
+    markersRef.current = markers;
+  }, [markers]);
+  useEffect(() => {
+    coordsRef.current = coords;
+  }, [coords]);
 
   const fitAll = useCallback(() => {
-    const locations = Object.values(markers || {}).filter(
+    const locations = Object.values(markersRef.current || {}).filter(
       (m) => m && typeof m.lat === "number" && typeof m.lng === "number",
     );
-
     if (!locations.length) return;
 
     if (locations.length === 1) {
@@ -19,7 +27,6 @@ function MapController({ markers, coords, setFitMap, setGoToMe }) {
     }
 
     const bounds = L.latLngBounds(locations.map((m) => [m.lat, m.lng]));
-
     if (bounds.isValid()) {
       map.fitBounds(bounds, {
         padding: [50, 50],
@@ -28,21 +35,17 @@ function MapController({ markers, coords, setFitMap, setGoToMe }) {
         duration: 1.2,
       });
     }
-  }, [map, markers]);
+  }, [map]); // 👈 only depends on map now
 
   const goMe = useCallback(() => {
-    if (!coords || coords.length !== 2) return;
+    const c = coordsRef.current;
+    if (!c || c.length !== 2) return;
+    map.flyTo(c, 16, { duration: 1.2 });
+  }, [map]); // 👈 only depends on map now
 
-    map.flyTo(coords, 16, {
-      duration: 1.2,
-    });
-  }, [map, coords]);
-
-  // Keep parent control references updated with latest state
   useEffect(() => {
     setFitMap(() => fitAll);
   }, [fitAll, setFitMap]);
-
   useEffect(() => {
     setGoToMe(() => goMe);
   }, [goMe, setGoToMe]);

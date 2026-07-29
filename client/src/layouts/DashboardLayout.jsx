@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../context/AuthContext";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 function DashboardLayout() {
   const { user } = useAuth();
@@ -27,7 +28,9 @@ function DashboardLayout() {
               : "items-center justify-center px-4 sm:px-6 lg:px-8 pt-32 pb-24 lg:pt-24 lg:pb-8"
           }`}
         >
+          {/* <ErrorBoundary> */}
           <Outlet />
+          {/* </ErrorBoundary> */}
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, Tooltip } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +22,26 @@ function Map() {
   const [fitMap, setFitMap] = useState(null);
   const [goToMe, setGoToMe] = useState(null);
   const [liveFollow, setLiveFollow] = useState(false);
+
+  const selfId = user?._id || user?.id;
+
+  const displayMarkers = useMemo(
+    () => ({
+      ...markers,
+      ...(selfId
+        ? {
+            [selfId]: markers[selfId] || {
+              userName: user?.name || "You",
+              lat: coords[0],
+              lng: coords[1],
+              isOnline: true,
+              locationUpdatedAt: new Date().toISOString(),
+            },
+          }
+        : {}),
+    }),
+    [markers, selfId, coords, user?.name],
+  );
 
   // Load locations when active family changes
   useEffect(() => {
@@ -74,22 +94,6 @@ function Map() {
       </div>
     );
   }
-
-  const selfId = user?._id || user?.id;
-  const displayMarkers = {
-    ...markers,
-    ...(selfId
-      ? {
-          [selfId]: markers[selfId] || {
-            userName: user?.name || "You",
-            lat: coords[0],
-            lng: coords[1],
-            isOnline: true,
-            locationUpdatedAt: new Date().toISOString(),
-          },
-        }
-      : {}),
-  };
 
   return (
     <div className="relative h-full w-full">
@@ -174,6 +178,9 @@ function Map() {
           showCoverageOnHover={false}
           spiderfyOnMaxZoom={true}
           zoomToBoundsOnClick={true}
+          maxClusterRadius={50}
+          disableClusteringAtZoom={17}
+          spiderfyDistanceMultiplier={2}
         >
           {Object.entries(displayMarkers).map(([userId, m]) => {
             const isCurrentUser = user?._id === userId || user?.id === userId;
