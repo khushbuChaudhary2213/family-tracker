@@ -161,13 +161,15 @@ function Map() {
       <MapContainer
         center={coords}
         zoom={13}
+        maxZoom={19} // How far the user is allowed to zoom in
         style={{ height: "100%", width: "100%" }}
         className="z-0"
       >
         <TileLayer
-          attribution="Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012"
+          attribution="Tiles &copy; Esri &mdash; Source: Esri..."
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
           maxZoom={19}
+          maxNativeZoom={17} // The server only has tiles up to this zoom level. If the user zooms in closer than this, don't ask the server for new images. Instead, just visually stretch/magnify the images from the maximum native zoom.
         />
         <MapController
           markers={displayMarkers}
