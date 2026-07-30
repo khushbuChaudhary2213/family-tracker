@@ -8,7 +8,7 @@ export const getDeviceString = () => {
   const deviceModel = result.device.model || "";
   const deviceType = result.device.type || "Desktop";
 
-  console.log(result);
+  // console.log(result);
 
   if (deviceVendor || deviceModel) {
     return `${deviceVendor} ${deviceModel}`.trim();

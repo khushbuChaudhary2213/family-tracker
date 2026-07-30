@@ -44,6 +44,7 @@ export default function Auth() {
         setError("");
 
         const pendingInvite = localStorage.getItem("pendingInvite");
+        let targetRoute = "/dashboard";
 
         if (pendingInvite) {
           try {
@@ -52,6 +53,7 @@ export default function Auth() {
             toast.success(
               "Account created & joined family circle successfully!",
             );
+            targetRoute = "/dashboard/map";
           } catch (joinErr) {
             console.error("Direct join failed on signup:", joinErr);
           } finally {
@@ -61,8 +63,12 @@ export default function Auth() {
           toast.success("Account created successfully! Welcome to Sentry.");
         }
 
-        await initializeSession(res.data.user);
-        navigate("/dashboard", { replace: true });
+        navigate(targetRoute, { replace: true });
+
+        // For passing out the race condition of initialising the session
+        setTimeout(async () => {
+          await initializeSession(res.data.user);
+        }, 50);
       } else {
         const errorMsg = res?.message || "Signup failed. Please try again.";
         toast.error(errorMsg);
@@ -87,6 +93,7 @@ export default function Auth() {
         // console.log(res);
 
         const pendingInvite = localStorage.getItem("pendingInvite");
+        let targetRoute = "/dashboard";
 
         if (pendingInvite) {
           try {
@@ -95,6 +102,8 @@ export default function Auth() {
             // Only remove on successful join
             localStorage.removeItem("pendingInvite");
             toast.success("Successfully joined the family circle!");
+            targetRoute = "/dashboard/map";
+            console.log(targetRoute);
           } catch (joinErr) {
             // Check if error is because they are already a member
             const isAlreadyMember =
@@ -117,8 +126,12 @@ export default function Auth() {
           toast.success("Access Granted. Welcome back to the SENTRY!");
         }
 
-        await initializeSession(res.data.user);
-        navigate("/dashboard", { replace: true });
+        navigate(targetRoute, { replace: true });
+
+        // For passing out the race condition of initialising the session
+        setTimeout(async () => {
+          await initializeSession(res.data.user);
+        }, 50);
       } else {
         toast.error("Authentication failed.");
       }

@@ -97,9 +97,9 @@ export default function App() {
                 {/* Note: Pass authMode as prop down to form state if your Auth card needs it, 
               and handle simulated success using standard callback events */}
                 <Auth
-                  initialMode={"login"}
-                  onBackToLanding={() => navigate("/")}
-                  onAuthSuccess={() => navigate("/dashboard")}
+                // initialMode={"login"}
+                // onBackToLanding={() => navigate("/")}
+                // onAuthSuccess={() => navigate("/dashboard")}
                 />
 
                 {/* <button

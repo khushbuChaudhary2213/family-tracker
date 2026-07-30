@@ -8,6 +8,7 @@ import MapController from "../components/MapController";
 import { useAuth } from "../context/AuthContext";
 import { useLocationContext } from "../context/LocationContext";
 import { createCustomMarkerIcon } from "../components/CustomMarker";
+import getLastSeen from "../utils/getLastSeen";
 
 function Map() {
   const { user, activeFamily } = useAuth();
@@ -210,6 +211,8 @@ function Map() {
         >
           {Object.entries(displayMarkers).map(([userId, m]) => {
             const isCurrentUser = user?._id === userId || user?.id === userId;
+            const locationUpdatedAt = new Date(m.locationUpdatedAt);
+
             return (
               <Marker
                 key={userId}
@@ -250,7 +253,9 @@ function Map() {
                           }`}
                         ></span>
                         <span className="text-[11px] font-medium text-zinc-300">
-                          {m.isOnline ? "Live Signal" : "Last Seen Offline"}
+                          {m.isOnline
+                            ? "Live Signal"
+                            : `Last Seen: ${getLastSeen(locationUpdatedAt)}`}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
