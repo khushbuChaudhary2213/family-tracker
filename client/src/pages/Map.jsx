@@ -11,7 +11,7 @@ import { createCustomMarkerIcon } from "../components/CustomMarker";
 
 function Map() {
   const { user, activeFamily } = useAuth();
-  const { markers, ensureLocationsLoaded, sendLiveLocation } =
+  const { markers, ensureLocationsLoaded, sendLiveLocation, myDeviceInfo } =
     useLocationContext();
   const navigate = useNavigate();
 
@@ -35,12 +35,13 @@ function Map() {
               lat: coords[0],
               lng: coords[1],
               isOnline: true,
+              deviceInfo: myDeviceInfo,
               locationUpdatedAt: new Date().toISOString(),
             },
           }
         : {}),
     }),
-    [markers, selfId, coords, user?.name],
+    [markers, selfId, coords, user?.name, myDeviceInfo],
   );
 
   // Load locations when active family changes
@@ -217,17 +218,24 @@ function Map() {
                       </div>
                     </div>
 
-                    <div className="mt-2.5 flex items-center gap-2">
-                      <span
-                        className={`h-2 w-2 rounded-full ${
-                          m.isOnline
-                            ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
-                            : "bg-zinc-500"
-                        }`}
-                      ></span>
-                      <span className="text-[11px] font-medium text-zinc-300">
-                        {m.isOnline ? "Live Signal" : "Last Seen Offline"}
-                      </span>
+                    <div className="mt-2.5 flex flex-col gap-1.5">
+                      <div className="mt-2.5 flex items-center gap-2">
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            m.isOnline
+                              ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
+                              : "bg-zinc-500"
+                          }`}
+                        ></span>
+                        <span className="text-[11px] font-medium text-zinc-300">
+                          {m.isOnline ? "Live Signal" : "Last Seen Offline"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-medium text-zinc-400 opacity-80">
+                          📱 {m.deviceInfo || "Unknown Device"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Popup>

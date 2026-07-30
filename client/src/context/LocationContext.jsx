@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import getFamilyLocations from "../apiFuncs/getFamilyLocations";
+import { getDeviceString } from "../utils/getDeviceString";
 
 const LocationContext = createContext();
 
@@ -14,6 +15,9 @@ export function LocationProvider({ children }) {
   const socketRef = useRef(null);
   const joinedFamilyRef = useRef(null);
 
+  const myDeviceInfo = useRef(getDeviceString());
+  // console.log(myDeviceInfo.current);
+
   // Create the socket exactly once per logged-in session — not per page visit
   useEffect(() => {
     if (!user || user.placeholder) return;
@@ -24,7 +28,14 @@ export function LocationProvider({ children }) {
     socketRef.current = socket;
 
     socket.on("receive_live_location", (data) => {
-      const { familyId, userId, userName, currentLocation, isOnline } = data;
+      const {
+        familyId,
+        userId,
+        userName,
+        currentLocation,
+        isOnline,
+        deviceInfo,
+      } = data;
       setLocationsByFamily((prev) => ({
         ...prev,
         [familyId]: {
@@ -34,6 +45,7 @@ export function LocationProvider({ children }) {
             lat: currentLocation.lat,
             lng: currentLocation.lng,
             isOnline,
+            deviceInfo,
             locationUpdatedAt: new Date().toISOString(),
           },
         },
@@ -41,7 +53,14 @@ export function LocationProvider({ children }) {
     });
 
     socket.on("family_member_status", (data) => {
-      const { familyId, userId, userName, isOnline, lastKnownLocation } = data;
+      const {
+        familyId,
+        userId,
+        userName,
+        isOnline,
+        deviceInfo,
+        lastKnownLocation,
+      } = data;
       setLocationsByFamily((prev) => {
         const familyMarkers = prev[familyId] || {};
         const existing = familyMarkers[userId];
@@ -57,6 +76,7 @@ export function LocationProvider({ children }) {
               lat: source.lat,
               lng: source.lng,
               isOnline,
+              deviceInfo: deviceInfo || existing?.deviceInfo,
               locationUpdatedAt: new Date().toISOString(),
             },
           },
@@ -113,6 +133,7 @@ export function LocationProvider({ children }) {
             lat,
             lng,
             isOnline: loc.isOnline,
+            deviceInfo: loc.deviceInfo,
             locationUpdatedAt: loc.locationUpdatedAt,
           };
         });
@@ -138,6 +159,7 @@ export function LocationProvider({ children }) {
           lat: coords.lat,
           lng: coords.lng,
           isOnline: true,
+          deviceInfo: myDeviceInfo.current,
           locationUpdatedAt: new Date().toISOString(),
         },
       },
@@ -148,6 +170,7 @@ export function LocationProvider({ children }) {
     if (!socketRef.current) return;
     socketRef.current.emit("send_live_location", {
       coords,
+      deviceInfo: myDeviceInfo.current,
     });
   };
 
@@ -162,6 +185,7 @@ export function LocationProvider({ children }) {
         ensureLocationsLoaded,
         sendLiveLocation,
         updateMyLocation,
+        myDeviceInfo: myDeviceInfo.current,
       }}
     >
       {children}
