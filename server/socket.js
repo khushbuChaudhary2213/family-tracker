@@ -48,6 +48,7 @@ const initSockets = (server) => {
 
     // socket.family = null;
     socket.lastKnownCoords = null;
+    socket.lastKnownDevice = "Unknown Device";
 
     const loadMyFamilies = async () => {
       const families = await Family.find({ "members.user": userId }).populate(
@@ -128,7 +129,7 @@ const initSockets = (server) => {
       try {
         // console.log("Data received: ", data);
         // const { familyId, coords } = data;
-        const { coords } = data || {};
+        const { coords, deviceInfo } = data || {};
 
         // const userId = socket.user.id.toString();
         // const username = socket.user.name;
@@ -139,6 +140,9 @@ const initSockets = (server) => {
 
         socket.lastKnownCoords = coords;
 
+        if (deviceInfo) {
+          socket.lastKnownDevice = deviceInfo;
+        }
         const families = await loadMyFamilies();
 
         families.forEach((family) => {
@@ -150,6 +154,7 @@ const initSockets = (server) => {
               userName: socket.user.name,
               currentLocation: coords,
               isOnline: true,
+              deviceInfo: socket.lastKnownDevice,
             });
           });
 
@@ -179,6 +184,10 @@ const initSockets = (server) => {
           updatedPayload.locationUpdatedAt = new Date();
         }
 
+        if (socket.lastKnownDevice) {
+          updatedPayload.deviceInfo = socket.lastKnownDevice;
+        }
+
         await User.findByIdAndUpdate(userId, { $set: updatedPayload });
 
         const families = socket.families?.length
@@ -194,6 +203,7 @@ const initSockets = (server) => {
               userName: socket.user.name,
               isOnline: false,
               lastKnownLocation: socket.lastKnownCoords || null,
+              deviceInfo: socket.lastKnownDevice,
             });
           });
         });

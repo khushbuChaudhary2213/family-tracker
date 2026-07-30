@@ -4,7 +4,7 @@ const ErrorHandler = require("../utils/ErrorHandler");
 
 exports.updateLocation = async (req, res, next) => {
   try {
-    const { lng, lat } = req.body;
+    const { lng, lat, deviceInfo } = req.body;
     const user = req.user;
 
     if (!lat || !lng)
@@ -22,7 +22,11 @@ exports.updateLocation = async (req, res, next) => {
     const updatedUser = await User.findByIdAndUpdate(
       { _id: user._id },
       {
-        $set: { currentLocation: newLocation, locationUpdatedAt: new Date() },
+        $set: {
+          currentLocation: newLocation,
+          locationUpdatedAt: new Date(),
+          deviceInfo: deviceInfo,
+        },
       },
       {
         new: true,
@@ -50,7 +54,7 @@ exports.getFamilyLocations = async (req, res, next) => {
     const { familyId } = req.params;
     const family = await Family.findById(familyId).populate(
       "members.user",
-      "_id name phoneNumber currentLocation locationUpdatedAt isOnline",
+      "_id name phoneNumber currentLocation locationUpdatedAt isOnline deviceInfo",
     );
 
     if (!family) return next(new ErrorHandler(404, "Family not found!"));
@@ -85,6 +89,7 @@ exports.getFamilyLocations = async (req, res, next) => {
           isOnline: canSee ? m.user.isOnline : null,
           currentLocation: canSee ? m.user.currentLocation : null,
           locationUpdatedAt: canSee ? m.user.locationUpdatedAt : null,
+          deviceInfo: canSee ? m.user.deviceInfo : null,
         };
       });
 

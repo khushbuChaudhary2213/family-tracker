@@ -41,6 +41,10 @@ const userSchema = mongoose.Schema(
       coordinates: { type: [Number], default: [0, 0] },
     },
     locationUpdatedAt: { type: Date },
+    deviceInfo: {
+      type: String,
+      default: "Unknown Device",
+    },
   },
   {
     timestamps: true,
