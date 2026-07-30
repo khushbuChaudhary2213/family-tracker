@@ -18,6 +18,7 @@ function Map() {
   const [coords, setCoords] = useState([]);
   const lastSentCoords = useRef(null);
   const lastSentTime = useRef(0);
+  const initialZoomDone = useRef(false);
 
   const [fitMap, setFitMap] = useState(null);
   const [goToMe, setGoToMe] = useState(null);
@@ -46,10 +47,31 @@ function Map() {
 
   // Load locations when active family changes
   useEffect(() => {
+    initialZoomDone.current = false;
+
     if (activeFamily?.familyId) {
       ensureLocationsLoaded(activeFamily.familyId);
     }
   }, [activeFamily?.familyId]);
+
+  useEffect(() => {
+    // If we already zoomed, or map controllers aren't ready, or we have no GPS yet, do nothing
+    if (initialZoomDone.current || !fitMap || !goToMe || coords.length === 0)
+      return;
+
+    if (activeFamily) {
+      // Wait for family markers to actually arrive from the backend context
+      // (When it loads, the markers object will have keys)
+      if (Object.keys(markers).length > 0) {
+        fitMap(); // Zooms out to fit the whole family circle
+        initialZoomDone.current = true;
+      }
+    } else {
+      // Solo Mode: Just jump to the user's location (it will use the default zoom=17)
+      goToMe();
+      initialZoomDone.current = true;
+    }
+  }, [activeFamily, markers, fitMap, goToMe, coords]);
 
   // Start continuous GPS tracking
   useEffect(() => {
@@ -161,7 +183,7 @@ function Map() {
       {/* MAP CONTAINER */}
       <MapContainer
         center={coords}
-        zoom={13}
+        zoom={17}
         maxZoom={19} // How far the user is allowed to zoom in
         style={{ height: "100%", width: "100%" }}
         className="z-0"
