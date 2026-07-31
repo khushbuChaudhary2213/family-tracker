@@ -260,7 +260,10 @@ function Map() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-medium text-zinc-400 opacity-80">
-                          📱 {m.deviceInfo || "Unknown Device"}
+                          {m.deviceInfo.toLowerCase().includes("desktop")
+                            ? `🖥️`
+                            : `📱`}
+                          {m.deviceInfo || "Unknown Device"}
                         </span>
                       </div>
                     </div>
