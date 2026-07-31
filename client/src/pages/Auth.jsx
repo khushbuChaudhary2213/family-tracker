@@ -354,14 +354,14 @@ export default function Auth() {
                   <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7]">
                     Password
                   </label>
-                  {!isSignUp && (
-                    <a
-                      className="text-[10px] font-semibold text-[#b0c6ff] hover:underline transition-all"
-                      href="#forgot"
-                    >
-                      FORGOT PASSWORD?
-                    </a>
-                  )}
+                  {/* {!isSignUp && (
+                    // <a
+                    //   className="text-[10px] font-semibold text-[#b0c6ff] hover:underline transition-all"
+                    //   href="#forgot"
+                    // >
+                    //   FORGOT PASSWORD?
+                    // </a>
+                  // )} */}
                 </div>
                 <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
                   <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
