@@ -5,7 +5,8 @@ const signToken = require("../utils/signToken.js");
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, phoneNumber, password, confirmPassword } = req.body;
+    console.log(req.body);
+    const { name, email, phoneNumber, password, confirmPassword } = req.body;
 
     if (password != confirmPassword)
       return next(
@@ -13,7 +14,7 @@ exports.register = async (req, res, next) => {
       );
 
     const existingUser = await User.findOne({ phoneNumber });
-    console.log(existingUser);
+    // console.log(existingUser);
 
     if (existingUser) {
       return next(new ErrorHandler(400, "User already exists!"));
@@ -21,6 +22,7 @@ exports.register = async (req, res, next) => {
 
     const newUser = await User.create({
       name,
+      email,
       phoneNumber,
       password,
       confirmPassword,

@@ -17,6 +17,9 @@ router
   .patch(userController.updateProfile)
   .delete(userController.deleteProfile);
 
-router.patch("/change-password", userController.changePassword);
+router.patch("/change-password", userController.changePasswordUsingCurrentPass);
+
+router.post("/forgot-password", userController.forgotPassword);
+router.post("/reset-password", userController.resetPassword);
 
 module.exports = router;

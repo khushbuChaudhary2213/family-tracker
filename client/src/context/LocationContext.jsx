@@ -37,8 +37,10 @@ export function LocationProvider({ children }) {
         deviceInfo,
       } = data;
       setLocationsByFamily((prev) => ({
+        // keeping previous families
         ...prev,
         [familyId]: {
+          // keeping existing users of this family
           ...(prev[familyId] || {}),
           [userId]: {
             userName,

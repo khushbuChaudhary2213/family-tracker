@@ -1,9 +1,16 @@
 import api from "../utils/axios";
 
-const signUpUser = async ({ name, phoneNumber, password, confirmPassword }) => {
+const signUpUser = async ({
+  name,
+  email,
+  phoneNumber,
+  password,
+  confirmPassword,
+}) => {
   try {
     const res = await api.post("/users/signup", {
       name,
+      email,
       phoneNumber,
       password,
       confirmPassword,

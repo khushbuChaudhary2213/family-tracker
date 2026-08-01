@@ -8,6 +8,7 @@ const userSchema = mongoose.Schema(
       trim: true,
       required: true,
     },
+
     phoneNumber: {
       type: String,
       required: [true, "Please enter your mobile no!"],
@@ -44,6 +45,20 @@ const userSchema = mongoose.Schema(
     deviceInfo: {
       type: String,
       default: "Unknown Device",
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required for password recovery"],
+      unique: true,
+      lowercase: true,
+    },
+    resetPasswordOtp: {
+      type: String,
+      select: false, // Hides this from normal database queries for security
+    },
+    resetPasswordOtpExpiry: {
+      type: Date,
+      select: false,
     },
   },
   {

@@ -1,7 +1,7 @@
 const User = require("../models/userModel");
 const Family = require("../models/familyModel");
 const ErrorHandler = require("../utils/ErrorHandler");
-// const { removeMemberFromFamily } = require("../utils/familyServices");
+const sendEmail = require("../utils/sendEmail");
 const { preventLastAdminLeaving } = require("../middleware/familyMiddleware");
 
 exports.getUser = async (req, res, next) => {
@@ -47,7 +47,7 @@ exports.updateProfile = async (req, res, next) => {
   }
 };
 
-exports.changePassword = async (req, res, next) => {
+exports.changePasswordUsingCurrentPass = async (req, res, next) => {
   try {
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
 
@@ -132,6 +132,91 @@ exports.deleteProfile = async (req, res, next) => {
       message: "User Deleted Successfully",
     });
     // removeMemberFromFamily(req.user);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { phoneNumber } = req.body;
+    const user = await User.findOne({ phoneNumber });
+
+    if (!user)
+      return next(new ErrorHandler(404, "No user found with this phoneNumber"));
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.resetPasswordOtp = otp;
+    user.resetPasswordOtpExpiry = Date.now() + 10 * 60 * 1000;
+    await user.save({ validateBeforeSave: false });
+
+    const message = `Your password reset code is: ${otp}. It is valid for 10 minutes. Please do not share this with anyone.`;
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: "Sentry - Password Reset Code",
+        message,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: `OTP sent successfully to registered email!`,
+      });
+    } catch (err) {
+      // If email fails, clear the OTP fields so they can try again
+      user.resetPasswordOtp = undefined;
+      user.resetPasswordOtpExpiry = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return next(
+        new ErrorHandler(500, "Error sending email. Try again later."),
+      );
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { phoneNumber, otp, newPassword, confirmNewPassword } = req.body;
+
+    if (newPassword !== confirmNewPassword) {
+      return next(new ErrorHandler(400, "Passwords do not match."));
+    }
+
+    const user = await User.findOne({ phoneNumber }).select(
+      "+resetPasswordOtp +resetPasswordOtpExpiry",
+    );
+
+    if (!user) {
+      return next(new ErrorHandler(404, "User not found."));
+    }
+
+    if (user.resetPasswordOtp !== otp) {
+      return next(new ErrorHandler(400, "Invalid OTP code."));
+    }
+
+    if (user.resetPasswordOtpExpiry < Date.now()) {
+      return next(
+        new ErrorHandler(400, "OTP has expired. Please request a new one."),
+      );
+    }
+
+    user.password = newPassword;
+    user.confirmPassword = confirmNewPassword;
+
+    user.resetPasswordOtp = undefined;
+    user.resetPasswordOtpExpiry = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successful! You can now log in.",
+    });
   } catch (err) {
     next(err);
   }

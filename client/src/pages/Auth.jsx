@@ -26,14 +26,22 @@ export default function Auth() {
   // State for controlled inputs
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSignUp = async (name, phone, password, confirmPassword) => {
+  const handleSignUp = async (
+    name,
+    email,
+    phone,
+    password,
+    confirmPassword,
+  ) => {
     setIsLoading(true);
     try {
       const res = await signUpUser({
         name,
+        email,
         phoneNumber: phone,
         password,
         confirmPassword,
@@ -151,6 +159,9 @@ export default function Auth() {
     setError("");
 
     const cleanedPhone = String(phone || "").replace(/\D/g, "");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (cleanedPhone.length < 10) {
       setError("Phone number must be exactly 10 digits.!");
       return;
@@ -160,11 +171,15 @@ export default function Auth() {
       return;
     }
     if (isSignUp) {
+      if (!emailRegex.test(email)) {
+        setError("Please enter a valid email address");
+        return;
+      }
       if (password != confirmPassword) {
         setError("Passwords do not match!");
         return;
       }
-      handleSignUp(name, phone, password, confirmPassword);
+      handleSignUp(name, email, phone, password, confirmPassword);
     } else {
       handleLogin(phone, password);
     }
@@ -308,22 +323,51 @@ export default function Auth() {
                     : "grid-rows-[0fr] opacity-0 pointer-events-none mt-0 mb-0"
                 }`}
               >
-                <div className="overflow-hidden space-y-1.5">
-                  <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
-                    Name
-                  </label>
-                  <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
-                    <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
-                      person
-                    </span>
-                    <input
-                      required={isSignUp}
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-transparent border-none py-3.5 pl-12 pr-4 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/30 outline-none"
-                      placeholder="Alex Mercer"
-                    />
+                <div className="min-h-0 overflow-hidden">
+                  <div className="space-y-4">
+                    {/* Name */}
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
+                        Name
+                      </label>
+
+                      <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
+                        <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
+                          person
+                        </span>
+
+                        <input
+                          required={isSignUp}
+                          type="text"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="w-full bg-transparent border-none py-3.5 pl-12 pr-4 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/30 outline-none"
+                          placeholder="Alex Mercer"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="space-y-1.5">
+                      <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
+                        Email
+                      </label>
+
+                      <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
+                        <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
+                          mail
+                        </span>
+
+                        <input
+                          required={isSignUp}
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="w-full bg-transparent border-none py-3.5 pl-12 pr-4 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/30 outline-none"
+                          placeholder="alex@email.com"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -348,63 +392,63 @@ export default function Auth() {
                 </div>
               </div>
 
-              {/* Password Credentials Parameter Layout */}
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center px-1">
-                  <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7]">
-                    Password
-                  </label>
-                  {/* {!isSignUp && (
-                    // <a
-                    //   className="text-[10px] font-semibold text-[#b0c6ff] hover:underline transition-all"
-                    //   href="#forgot"
-                    // >
-                    //   FORGOT PASSWORD?
-                    // </a>
-                  // )} */}
-                </div>
-                <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
-                  <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
-                    lock
-                  </span>
-                  <input
-                    required
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-transparent border-none py-3.5 pl-12 pr-12 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/50 outline-none"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 text-[#8c90a0] hover:text-[#e5e2e1] transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-lg">
-                      {showPassword ? "visibility_off" : "visibility"}
-                    </span>
-                  </button>
-                </div>
-              </div>
+              {/* Password + Confirm Password */}
+              <div className={isSignUp ? "grid grid-cols-2 gap-3" : "block"}>
+                {/* Password */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center px-1">
+                    <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7]">
+                      Password
+                    </label>
 
-              {/* Conditional Registration Section Wrapper Block */}
-              <div
-                className={`grid transition-all duration-500 ease-out ${
-                  isSignUp
-                    ? "grid-rows-[1fr] opacity-100 mt-4 mb-2"
-                    : "grid-rows-[0fr] opacity-0 pointer-events-none mt-0 mb-0"
-                }`}
-              >
-                <div className="overflow-hidden space-y-4">
-                  {/* 1. Confirm Password Field */}
-                  <div className="space-y-1.5 transition-all duration-300 transform">
+                    {!isSignUp && (
+                      <a
+                        className="text-[10px] font-semibold text-[#b0c6ff] hover:underline transition-all"
+                        href="#forgot"
+                      >
+                        FORGOT PASSWORD?
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
+                    <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
+                      lock
+                    </span>
+
+                    <input
+                      required
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-transparent border-none py-3.5 pl-12 pr-12 focus:ring-0 text-[#e5e2e1] text-sm placeholder:text-[#8c90a0]/50 outline-none"
+                      placeholder="••••••••"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 text-[#8c90a0] hover:text-[#e5e2e1] transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-lg">
+                        {showPassword ? "visibility_off" : "visibility"}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Confirm Password - Signup Only */}
+                {isSignUp && (
+                  <div className="space-y-1.5">
                     <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
                       Confirm Password
                     </label>
+
                     <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
                       <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
                         gpp_good
                       </span>
+
                       <input
                         required={isSignUp}
                         type={showPassword ? "text" : "password"}
@@ -415,7 +459,7 @@ export default function Auth() {
                       />
                     </div>
                   </div>
-                </div>
+                )}
               </div>
               {/* Dynamic Core Submit Execution Action Button */}
               <button
