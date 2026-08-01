@@ -162,9 +162,16 @@ exports.forgotPassword = async (req, res, next) => {
         html: passwordResetTemplate(otp),
       });
 
+      const [name, domain] = user.email.split("@");
+      const maskedEmail =
+        name.length > 3
+          ? `${name[0]}${"*".repeat(name.length - 3)}${name.slice(-2)}@${domain}`
+          : `${name[0]}*@${domain}`;
+
       res.status(200).json({
         success: true,
         message: `OTP sent successfully to registered email!`,
+        maskedEmail,
       });
     } catch (err) {
       console.log("Email Error:", err);

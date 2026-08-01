@@ -6,6 +6,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [maskedEmail, setMaskedEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -14,7 +15,6 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  // Reset state when closing
   const handleClose = () => {
     setStep(1);
     setPhone("");
@@ -28,9 +28,10 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await api.post("/users/forgot-password", {
+      const res = await api.post("/users/forgot-password", {
         phoneNumber: phone,
       });
+      setMaskedEmail(res.data.maskedEmail);
       toast.success("OTP sent to your registered email!");
       setStep(2);
     } catch (err) {
@@ -143,8 +144,13 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
               <h2 className="text-xl font-bold text-[#b0c6ff] tracking-tight">
                 Verify Code
               </h2>
-              <p className="text-xs text-[#8c90a0] mt-1">
-                Enter the 6-digit code sent to your email.
+
+              <p className="text-xs text-[#8c90a0] mt-1 leading-relaxed">
+                For security, we sent a 6-digit code to your registered email
+                address: <br />
+                <span className="text-[#e5e2e1] font-bold tracking-wider ">
+                  {maskedEmail}
+                </span>
               </p>
             </div>
 
