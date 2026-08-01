@@ -23,5 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 
-git rm --cached config.env
-config/config.env
+# Environment files
+.env
+.config.env
