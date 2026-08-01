@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import updateProfile from "../apiFuncs/updateProfile";
 import changePassword from "../apiFuncs/changePassword";
 import deleteAccount from "../apiFuncs/deleteAccount";
+import ForgotPasswordModal from "../components/ForgotPasswordModal";
 
 export default function Settings() {
   const { user, initializeSession, logout } = useAuth();
@@ -13,6 +14,8 @@ export default function Settings() {
   // ---------- Profile section ----------
   const [name, setName] = useState(user?.name || "");
   const [savingProfile, setSavingProfile] = useState(false);
+
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
@@ -182,9 +185,20 @@ export default function Settings() {
 
         <form onSubmit={handleChangePassword} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
-              Current Password
-            </label>
+            <div className="flex justify-between">
+              <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
+                Current Password
+              </label>
+              <a
+                className="text-[10px] font-semibold text-[#b0c6ff] hover:underline transition-all cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsForgotModalOpen(true);
+                }}
+              >
+                FORGOT PASSWORD?
+              </a>
+            </div>
             <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center transition-all duration-200 focus-within:border-[#b0c6ff] focus-within:shadow-[0_0_15px_rgba(176,198,255,0.2)]">
               <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
                 lock
@@ -375,6 +389,11 @@ export default function Settings() {
           </div>
         </div>
       )}
+
+      <ForgotPasswordModal
+        isOpen={isForgotModalOpen}
+        onClose={() => setIsForgotModalOpen(false)}
+      />
     </div>
   );
 }

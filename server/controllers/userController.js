@@ -3,6 +3,7 @@ const Family = require("../models/familyModel");
 const ErrorHandler = require("../utils/ErrorHandler");
 const sendEmail = require("../utils/sendEmail");
 const { preventLastAdminLeaving } = require("../middleware/familyMiddleware");
+const { passwordResetTemplate } = require("../utils/emailTemplate");
 
 exports.getUser = async (req, res, next) => {
   try {
@@ -158,6 +159,7 @@ exports.forgotPassword = async (req, res, next) => {
         email: user.email,
         subject: "Sentry - Password Reset Code",
         message,
+        html: passwordResetTemplate(otp),
       });
 
       res.status(200).json({
@@ -165,7 +167,7 @@ exports.forgotPassword = async (req, res, next) => {
         message: `OTP sent successfully to registered email!`,
       });
     } catch (err) {
-      // If email fails, clear the OTP fields so they can try again
+      console.log("Email Error:", err);
       user.resetPasswordOtp = undefined;
       user.resetPasswordOtpExpiry = undefined;
       await user.save({ validateBeforeSave: false });
@@ -174,6 +176,33 @@ exports.forgotPassword = async (req, res, next) => {
         new ErrorHandler(500, "Error sending email. Try again later."),
       );
     }
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.verifyOTP = async (req, res, next) => {
+  try {
+    const { phoneNumber, otp } = req.body;
+
+    const user = await User.findOne({ phoneNumber }).select(
+      "+resetPasswordOtp +resetPasswordOtpExpiry",
+    );
+
+    if (!user) return next(new ErrorHandler(404, "User not found."));
+
+    if (user.resetPasswordOtp !== otp) {
+      return next(new ErrorHandler(400, "Invalid OTP code."));
+    }
+
+    if (user.resetPasswordOtpExpiry < Date.now()) {
+      return next(new ErrorHandler(400, "OTP has expired."));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified. Proceed to reset password.",
+    });
   } catch (err) {
     next(err);
   }

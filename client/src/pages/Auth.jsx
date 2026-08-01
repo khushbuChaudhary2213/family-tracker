@@ -4,8 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
 import loginUser from "../apiFuncs/loginUser";
-import getCurrentUser from "../apiFuncs/getCurrentUser";
 import joinFamily from "../apiFuncs/joinFamily";
+import ForgotPasswordModal from "../components/ForgotPasswordModal";
 
 export default function Auth() {
   const { initializeSession } = useAuth();
@@ -18,6 +18,8 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(incomingMode === "signup");
   const [showPassword, setShowPassword] = useState(false);
+
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
 
   useEffect(() => {
     setIsSignUp(incomingMode === "signup");
@@ -403,8 +405,11 @@ export default function Auth() {
 
                     {!isSignUp && (
                       <a
-                        className="text-[10px] font-semibold text-[#b0c6ff] hover:underline transition-all"
-                        href="#forgot"
+                        className="text-[10px] font-semibold text-[#b0c6ff] hover:underline transition-all cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsForgotModalOpen(true);
+                        }}
                       >
                         FORGOT PASSWORD?
                       </a>
@@ -489,6 +494,11 @@ export default function Auth() {
           </p>
         </div>
       </div>
+
+      <ForgotPasswordModal
+        isOpen={isForgotModalOpen}
+        onClose={() => setIsForgotModalOpen(false)}
+      />
     </main>
   );
 }
