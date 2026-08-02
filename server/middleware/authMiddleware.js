@@ -39,7 +39,7 @@ exports.protect = async (req, res, next) => {
     const currentUser = await verifyToken(token);
 
     req.user = currentUser;
-    console.log(`Logged in user: ${req.user}`);
+    // console.log(`Logged in user: ${req.user}`);
 
     next();
   } catch (err) {
