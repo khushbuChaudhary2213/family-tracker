@@ -141,10 +141,15 @@ exports.deleteProfile = async (req, res, next) => {
 exports.forgotPassword = async (req, res, next) => {
   try {
     const { phoneNumber } = req.body;
-    const user = await User.findOne({ phoneNumber });
+    const user = req.user
+      ? await User.findById(req.user._id).select(
+          "+resetPasswordOtp +resetPasswordOtpExpiry",
+        )
+      : await User.findOne({ phoneNumber }).select(
+          "+resetPasswordOtp +resetPasswordOtpExpiry",
+        );
 
-    if (!user)
-      return next(new ErrorHandler(404, "No user found with this phoneNumber"));
+    if (!user) return next(new ErrorHandler(404, "User not found"));
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -192,9 +197,13 @@ exports.verifyOTP = async (req, res, next) => {
   try {
     const { phoneNumber, otp } = req.body;
 
-    const user = await User.findOne({ phoneNumber }).select(
-      "+resetPasswordOtp +resetPasswordOtpExpiry",
-    );
+    const user = req.user
+      ? await User.findById(req.user._id).select(
+          "+resetPasswordOtp +resetPasswordOtpExpiry",
+        )
+      : await User.findOne({ phoneNumber }).select(
+          "+resetPasswordOtp +resetPasswordOtpExpiry",
+        );
 
     if (!user) return next(new ErrorHandler(404, "User not found."));
 
@@ -223,9 +232,13 @@ exports.resetPassword = async (req, res, next) => {
       return next(new ErrorHandler(400, "Passwords do not match."));
     }
 
-    const user = await User.findOne({ phoneNumber }).select(
-      "+resetPasswordOtp +resetPasswordOtpExpiry",
-    );
+    const user = req.user
+      ? await User.findById(req.user._id).select(
+          "+resetPasswordOtp +resetPasswordOtpExpiry",
+        )
+      : await User.findOne({ phoneNumber }).select(
+          "+resetPasswordOtp +resetPasswordOtpExpiry",
+        );
 
     if (!user) {
       return next(new ErrorHandler(404, "User not found."));
