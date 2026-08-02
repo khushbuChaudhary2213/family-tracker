@@ -1,30 +1,39 @@
-const nodemailer = require("nodemailer");
+const { BrevoClient } = require("@getbrevo/brevo");
+
+const brevo = new BrevoClient({
+  apiKey: process.env.BREVO_API_KEY,
+});
 
 const sendEmail = async (options) => {
-  // 1. Create a transporter
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    family: 4,
-    auth: {
-      user: process.env.EMAIL_USERNAME, // e.g., your-email@gmail.com
-      pass: process.env.EMAIL_PASSWORD, // Your 16-character Gmail App Password
-    },
-  });
+  try {
+    const response = await brevo.transactionalEmails.sendTransacEmail({
+      sender: {
+        name: process.env.BREVO_SENDER_NAME,
+        email: process.env.BREVO_SENDER_EMAIL,
+      },
 
-  // 2. Define email options
-  const mailOptions = {
-    from: '"Sentry Family Tracker" <noreply@sentry.com>',
-    to: options.email,
-    subject: options.subject,
-    text: options.message,
+      to: [
+        {
+          email: options.email,
+        },
+      ],
 
-    html: options.html,
-  };
+      subject: options.subject,
 
-  // 3. Send the email
-  await transporter.sendMail(mailOptions);
+      textContent: options.message,
+
+      ...(options.html && {
+        htmlContent: options.html,
+      }),
+    });
+
+    // console.log("Email sent:", response.messageId);
+
+    return response;
+  } catch (error) {
+    console.error("Brevo Email Error:", error);
+    throw error;
+  }
 };
 
 module.exports = sendEmail;
