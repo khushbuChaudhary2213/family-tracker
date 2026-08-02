@@ -140,7 +140,7 @@ exports.deleteProfile = async (req, res, next) => {
 
 exports.forgotPassword = async (req, res, next) => {
   try {
-    const { phoneNumber } = req.body;
+    const phoneNumber = req.body?.phoneNumber;
     const user = req.user
       ? await User.findById(req.user._id).select(
           "+resetPasswordOtp +resetPasswordOtpExpiry",
@@ -195,7 +195,8 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.verifyOTP = async (req, res, next) => {
   try {
-    const { phoneNumber, otp } = req.body;
+    const phoneNumber = req.body?.phoneNumber;
+    const otp = req.body.otp;
 
     const user = req.user
       ? await User.findById(req.user._id).select(
@@ -226,7 +227,8 @@ exports.verifyOTP = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   try {
-    const { phoneNumber, otp, newPassword, confirmNewPassword } = req.body;
+    const phoneNumber = req.body?.phoneNumber;
+    const { otp, newPassword, confirmNewPassword } = req.body;
 
     if (newPassword !== confirmNewPassword) {
       return next(new ErrorHandler(400, "Passwords do not match."));

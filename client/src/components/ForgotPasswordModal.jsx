@@ -1,8 +1,10 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import api from "../utils/axios"; // Ensure you have axios installed and configured
+import { useAuth } from "../context/AuthContext";
 
 export default function ForgotPasswordModal({ isOpen, onClose }) {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,9 +30,15 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await api.post("/users/forgot-password", {
-        phoneNumber: phone,
-      });
+      let res;
+      if (user) {
+        res = await api.post("/users/request-password-change-otp");
+      } else {
+        res = await api.post("/users/forgot-password", {
+          phoneNumber: phone,
+        });
+      }
+
       setMaskedEmail(res.data.maskedEmail);
       toast.success("OTP sent to your registered email!");
       setStep(2);
@@ -45,10 +53,17 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await api.post("/users/verify-otp", {
-        phoneNumber: phone,
-        otp,
-      });
+      if (user) {
+        await api.post("/users/verify-password-change-otp", {
+          otp,
+        });
+      } else {
+        await api.post("/users/verify-otp", {
+          phoneNumber: phone,
+          otp,
+        });
+      }
+
       toast.success("OTP Verified!");
       setStep(3);
     } catch (err) {
@@ -69,14 +84,23 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
 
     setIsLoading(true);
     try {
-      await api.post("/users/reset-password", {
-        phoneNumber: phone,
-        otp,
-        newPassword,
-        confirmNewPassword: confirmPassword,
-      });
+      if (user) {
+        await api.post("/users/reset-password-with-otp", {
+          otp,
+          newPassword,
+          confirmNewPassword: confirmPassword,
+        });
+      } else {
+        await api.post("/users/reset-password", {
+          phoneNumber: phone,
+          otp,
+          newPassword,
+          confirmNewPassword: confirmPassword,
+        });
+      }
 
-      toast.success("Password reset successfully! You can now log in.");
+      if (user) toast.success("Password reset successfully!");
+      else toast.success("Password reset successfully! You can now log in.");
       handleClose();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to reset password.");
@@ -103,29 +127,33 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
               <h2 className="text-xl font-bold text-[#b0c6ff] tracking-tight">
                 Reset Password
               </h2>
-              <p className="text-xs text-[#8c90a0] mt-1">
-                Enter your registered phone number.
-              </p>
+              {!user && (
+                <p className="text-xs text-[#8c90a0] mt-1">
+                  Enter your registered phone number.
+                </p>
+              )}
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
-                Phone Number
-              </label>
-              <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center focus-within:border-[#b0c6ff] transition-all">
-                <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
-                  phone
-                </span>
-                <input
-                  required
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full bg-transparent border-none py-3.5 pl-12 pr-4 text-[#e5e2e1] text-sm outline-none"
-                  placeholder="123456XXXX"
-                />
+            {!user && (
+              <div className="space-y-1.5">
+                <label className="text-[12px] font-semibold tracking-wide text-[#c2c6d7] ml-1">
+                  Phone Number
+                </label>
+                <div className="relative bg-[#0e0e0e] rounded-lg border border-[#424654] flex items-center focus-within:border-[#b0c6ff] transition-all">
+                  <span className="material-symbols-outlined absolute left-4 text-[#8c90a0] text-lg">
+                    phone
+                  </span>
+                  <input
+                    required
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full bg-transparent border-none py-3.5 pl-12 pr-4 text-[#e5e2e1] text-sm outline-none"
+                    placeholder="123456XXXX"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             <button
               type="submit"
