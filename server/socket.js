@@ -139,10 +139,8 @@ const initSockets = (server) => {
         }
 
         socket.lastKnownCoords = coords;
+        socket.lastKnownDevice = deviceInfo;
 
-        if (deviceInfo) {
-          socket.lastKnownDevice = deviceInfo;
-        }
         const families = await loadMyFamilies();
 
         families.forEach((family) => {
